@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import {
   HelpCircle,
@@ -15,7 +16,7 @@ import {
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
 
-export const FaqPage: React.FC = () => {
+export default function FaqPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const faqs = [
@@ -142,3 +143,4 @@ export const FaqPage: React.FC = () => {
     </div>
   );
 };
+

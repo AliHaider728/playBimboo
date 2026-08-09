@@ -26,6 +26,7 @@ import { getAuthToken, removeAuthToken, api, isSuperAdmin } from '../../../servi
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = usePathname();
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const token = getAuthToken();
@@ -96,7 +97,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           <nav className="space-y-1">
             {navItems.map(item => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
+              const isActive = pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path));
               return (
                 <Link
                   key={item.path}
@@ -149,7 +150,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               <Menu className="w-5 h-5" />
             </button>
             <span className="font-heading font-extrabold text-sm text-slate-900">
-              {navItems.find(i => i.path === location.pathname)?.label || 'Admin Management'}
+              {navItems.find(i => i.path === pathname)?.label || 'Admin Management'}
             </span>
           </div>
 

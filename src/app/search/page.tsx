@@ -1,5 +1,7 @@
+"use client";
 import React, { useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { ProductCard } from '../../components/common/ProductCard';
@@ -7,8 +9,8 @@ import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
 import { isProductVisibleOnStorefront } from '../../utils/products';
 
-export const SearchResultsPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+function SearchResultsContent() {
+  const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const { products } = useStore();
 
@@ -73,8 +75,7 @@ export const SearchResultsPage: React.FC = () => {
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               Try searching for terms like "blocks", "robot", "plush", or "puzzle".
             </p>
-            <Link
-              to="/category/all"
+            <Link href="/category/all"
               className="inline-block px-6 py-2.5 rounded-2xl bg-rose-500 text-white font-heading font-bold text-xs"
             >
               Browse All Toys
@@ -91,3 +92,12 @@ export const SearchResultsPage: React.FC = () => {
     </div>
   );
 };
+
+import { Suspense } from 'react';
+export default function SearchResultsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center">Loading...</div>}>
+      <SearchResultsContent />
+    </Suspense>
+  );
+}

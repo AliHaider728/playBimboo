@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 
-import { api, setAuthToken } from '../../../services/api';
+import { api, setAuthToken, getLastApiError } from '../../../services/api';
 
 export const AdminLoginPageClient: React.FC = () => {
   const router = useRouter();
@@ -25,7 +25,12 @@ export const AdminLoginPageClient: React.FC = () => {
         localStorage.setItem('pb_admin_user', JSON.stringify(res.user));
         router.push('/admin');
       } else {
-        setError('Invalid admin credentials. Please check your email and password.');
+        const apiError = getLastApiError();
+        if (apiError && apiError.toLowerCase().includes('failed to fetch')) {
+          setError('Backend API is unreachable. Please verify the backend server is running on port 5000.');
+        } else {
+          setError(apiError || 'Invalid admin credentials. Please check your email and password.');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Login failed. Please verify backend server is running.');

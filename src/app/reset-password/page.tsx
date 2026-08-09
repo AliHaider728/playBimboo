@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+"use client";
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { api, API_BASE_URL } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import { Lock, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import { Logo as StoreLogo } from '../../components/common/Logo';
 
-export const ResetPasswordPage: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 font-sans py-16 flex items-center justify-center p-4">Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+
+function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
-  
-  const searchParams = new URLSearchParams(location.search);
   const token = searchParams.get('token');
   const isActivation = searchParams.get('activate') === '1';
 
@@ -44,7 +51,7 @@ export const ResetPasswordPage: React.FC = () => {
       
       setSuccess(true);
       showToast(isActivation ? 'Account activated successfully!' : 'Password reset successful!', 'success');
-      setTimeout(() => navigate('/login'), 3000);
+      setTimeout(() => router.push('/login'), 3000);
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
@@ -66,7 +73,7 @@ export const ResetPasswordPage: React.FC = () => {
             Your password has been successfully saved. You will be redirected to the login page momentarily.
           </p>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => router.push('/login')}
             className="w-full rounded-2xl bg-rose-500 py-3.5 text-sm font-bold text-white transition-all hover:bg-rose-600 active:scale-95"
           >
             Go to Login

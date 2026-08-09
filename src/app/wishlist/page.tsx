@@ -1,5 +1,6 @@
+"use client";
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from "next/link";
 import { Heart, Trash2, ShoppingBag } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { ProductCard } from '../../components/common/ProductCard';
@@ -7,7 +8,7 @@ import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
 import { isProductVisibleOnStorefront } from '../../utils/products';
 
-export const WishlistPage: React.FC = () => {
+export default function WishlistPage() {
   const { wishlist, products, toggleWishlist } = useStore();
 
   const wishlistedProducts = products.filter(
@@ -42,8 +43,7 @@ export const WishlistPage: React.FC = () => {
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               Tap the heart icon on any toy to save it to your wishlist!
             </p>
-            <Link
-              to="/category/all"
+            <Link href="/category/all"
               className="inline-block px-6 py-2.5 rounded-2xl bg-rose-500 text-white font-heading font-bold text-xs"
             >
               Discover Toys
@@ -60,3 +60,5 @@ export const WishlistPage: React.FC = () => {
     </div>
   );
 };
+
+

@@ -39,8 +39,10 @@ import promoToysImage from '../assets/images/promo_toys.webp';
 export const HomePageClient: React.FC = () => {
   const { products, categories, settings } = useStore();
   const [selectedQuickViewProduct, setSelectedQuickViewProduct] = useState<Product | null>(null);
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
-  const visibleProducts = products.filter(isProductVisibleOnStorefront);
+  const visibleProducts = mounted ? products.filter(isProductVisibleOnStorefront) : [];
   const featuredProducts = [...new Map(
     visibleProducts.filter(p => p.isFeatured || p.isBestseller).map(product => [product.id, product])
   ).values()].slice(0, 4);
@@ -303,7 +305,7 @@ export const HomePageClient: React.FC = () => {
         <div className="relative w-full rounded-[28px] md:rounded-[36px] overflow-hidden flex flex-col justify-center min-h-125 md:h-[600px] lg:h-[650px] shadow-xl group">
           {/* Full Background Image */}
           <img 
-            src={promoToysImage}
+              src={typeof promoToysImage === 'string' ? promoToysImage : (promoToysImage as any).src}
             alt="Magical Learning Toys"
             className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02]"
           />
@@ -321,8 +323,8 @@ export const HomePageClient: React.FC = () => {
             {/* Logo */}
             <div className="bg-white/95   backdrop-blur-sm px-2.5 py-1.5 rounded-2xl shadow-sm border border-white/20 mb-2 shrink-0 animate-fade-in">
               <img 
-                src={typeof logoImage === 'string' ? logoImage : (logoImage as any).src} 
-                alt="Play Bimboo" 
+                  src={typeof logoImage === 'string' ? logoImage : ((logoImage as any)?.url || (logoImage as any)?.src)} 
+                  alt="Play Bimboo" 
                 className="w-32 h-auto object-contain"
               />
             </div>

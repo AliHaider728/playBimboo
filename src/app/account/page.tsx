@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { User, Package, MapPin, LogOut, Clock, XCircle, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
@@ -9,7 +10,7 @@ import { formatPrice } from '../../utils/formatters';
 import { useDialog } from '../../context/DialogContext';
 import { getSafeImageSrc } from '../../utils/images';
 
-export const AccountPage: React.FC = () => {
+export default function AccountPage() {
   const { orders, settings } = useStore();
   const { customerProfile, isLoggedIn, openAuthModal, logout, isLoading } = useAuth();
   const { showToast } = useToast();
@@ -219,3 +220,5 @@ export const AccountPage: React.FC = () => {
     </div>
   );
 };
+
+

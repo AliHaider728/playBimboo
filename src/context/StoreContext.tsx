@@ -799,17 +799,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <StoreContext.Provider
+        <StoreContext.Provider
       value={{
-        products,
+        products: isHydrated ? products : [],
         productsLoading,
-        categories,
-        orders,
-        customers,
-        coupons,
-        reviews,
-        settings,
-        cart,
+        categories: isHydrated ? categories : INITIAL_CATEGORIES,
+        orders: isHydrated ? orders : INITIAL_ORDERS,
+        customers: isHydrated ? customers : INITIAL_CUSTOMERS,
+        coupons: isHydrated ? coupons : INITIAL_COUPONS,
+        reviews: isHydrated ? reviews : INITIAL_REVIEWS,
+        settings: isHydrated ? settings : normalizeStoreSettings(INITIAL_SETTINGS),
+        cart: isHydrated ? cart : [],
         isCartOpen,
         setIsCartOpen,
         addToCart,
@@ -822,7 +822,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         applyCoupon,
         removeCoupon,
         couponDiscountAmount,
-        wishlist,
+        wishlist: isHydrated ? wishlist : [],
         toggleWishlist,
         isInWishlist,
         addProduct,

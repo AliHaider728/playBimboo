@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -158,28 +158,28 @@ export const ProductDetailPageClient: React.FC = () => {
     setApiRelatedProducts([]);
   }, [product?.id]);
 
-  const sanitizedSpecs = Object.entries(product?.specifications || {}).filter(
+  const sanitizedSpecs = useMemo(() => Object.entries(product?.specifications || {}).filter(
     ([key, val]) => key.trim() !== '' && typeof val === 'string' && val.trim() !== ''
-  );
+  ), [product?.specifications]);
 
-  const hasDesc = Boolean((product?.productDetailBlocks || []).filter(b => b.enabled).length > 0 || product?.description || product?.productDetailCustomCss);
-  const hasSpecs = Boolean(sanitizedSpecs.length > 0);
-  const hasSafety = Boolean(
+  const hasDesc = useMemo(() => Boolean((product?.productDetailBlocks || []).filter(b => b.enabled).length > 0 || product?.description || product?.productDetailCustomCss), [product?.productDetailBlocks, product?.description, product?.productDetailCustomCss]);
+  const hasSpecs = useMemo(() => Boolean(sanitizedSpecs.length > 0), [sanitizedSpecs]);
+  const hasSafety = useMemo(() => Boolean(
     (product?.safetyInfo && product.safetyInfo.trim() !== '') ||
     (product?.specifications?.Material && product.specifications.Material.trim() !== '') ||
     (product?.specifications?.['Safety Notes'] && product.specifications['Safety Notes'].trim() !== '') ||
     sanitizedSpecs.some(([key]) => key.toLowerCase().includes('safety') || key.toLowerCase().includes('material'))
-  );
+  ), [product?.safetyInfo, product?.specifications, sanitizedSpecs]);
   
-  const approvedReviews = productReviews.filter(r => r.status === 'approved');
-  const hasReviews = Boolean(approvedReviews.length > 0);
+  const approvedReviews = useMemo(() => productReviews.filter(r => r.status === 'approved'), [productReviews]);
+  const hasReviews = useMemo(() => Boolean(approvedReviews.length > 0), [approvedReviews]);
   
-  const availableTabs = [
+  const availableTabs = useMemo(() => [
     hasDesc && 'desc',
     hasSpecs && 'specs',
     hasSafety && 'safety',
     'reviews'
-  ].filter(Boolean) as string[];
+  ].filter(Boolean) as string[], [hasDesc, hasSpecs, hasSafety]);
 
   useEffect(() => {
     if (availableTabs.length > 0 && !availableTabs.includes(activeTab)) {
@@ -247,8 +247,8 @@ export const ProductDetailPageClient: React.FC = () => {
   }, [product?.id, product?.defaultVariationId]);
 
   const isVariable = product?.productType === 'variable';
-  const variationAttributes = (product?.attributes || []).filter(attribute => attribute.usedForVariations);
-  const currentVariation = isVariable
+  const variationAttributes = useMemo(() => (product?.attributes || []).filter(attribute => attribute.usedForVariations), [product?.attributes]);
+  const currentVariation = useMemo(() => isVariable
     ? product?.variations?.find(variation => {
         if (!variation.enabled) return false;
         return variationAttributes.length > 0 && variationAttributes.every(attribute => {
@@ -256,7 +256,7 @@ export const ProductDetailPageClient: React.FC = () => {
           return Boolean(selectedValue) && getVariationAttributeValue(variation, attribute) === selectedValue;
         });
       })
-    : undefined;
+    : undefined, [isVariable, product?.variations, variationAttributes, selectedAttributes]);
 
   useEffect(() => {
     if (!isVariable) return;
@@ -275,11 +275,11 @@ export const ProductDetailPageClient: React.FC = () => {
     };
   }, [currentVariation?.id, isVariable]);
 
-  const lightboxImages = product
+  const lightboxImages = useMemo(() => product
     ? overrideImage && !product.images.includes(overrideImage)
       ? [overrideImage, ...product.images]
       : product.images
-    : [];
+    : [], [product?.images, overrideImage]);
 
   useEffect(() => {
     if (!lightboxOpen) return;

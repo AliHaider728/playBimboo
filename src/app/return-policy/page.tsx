@@ -1,9 +1,10 @@
+"use client";
 import React from 'react';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
 import { RefreshCw, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 
-export const ReturnPolicyPage: React.FC = () => {
+export default function ReturnPolicyPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans py-8">
       <SeoHead title="Return Policy - PlayBimboo" />
@@ -40,3 +41,5 @@ export const ReturnPolicyPage: React.FC = () => {
     </div>
   );
 };
+
+

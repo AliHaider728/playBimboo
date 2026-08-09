@@ -1,12 +1,8 @@
 import React from 'react';
 import '../index.css';
 import { Providers } from './Providers';
-import { Header } from '../components/common/Header';
-import { Footer } from '../components/common/Footer';
-import { CartDrawer } from '../components/cart/CartDrawer';
 import { AuthModalWrapper } from './AuthModalWrapper';
-import { MobileBottomNav } from '../components/common/MobileBottomNav';
-import { FloatingWhatsApp } from '../components/common/FloatingWhatsApp';
+import { StorefrontLayoutWrapper } from '../components/common/StorefrontLayoutWrapper';
 
 export const metadata = {
   title: 'Play Bimboo - Magical Toys, Games & Playland',
@@ -30,17 +26,10 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased bg-slate-50 text-slate-800 selection:bg-amber-200 selection:text-amber-900">
         <Providers>
-          <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 pb-20 xl:pb-0">
-            <Header />
-            <CartDrawer />
-            <AuthModalWrapper />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <FloatingWhatsApp />
-            <MobileBottomNav />
-          </div>
+          <AuthModalWrapper />
+          <StorefrontLayoutWrapper>
+            {children}
+          </StorefrontLayoutWrapper>
         </Providers>
       </body>
     </html>
