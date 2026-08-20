@@ -28,7 +28,7 @@ import { formatPrice } from '../../utils/formatters';
 import { getProductDeliveryType } from '../../utils/products';
 import { getSafeImageSrc } from '../../utils/images';
 import { trackInitiateCheckout } from "../../lib/metaPixel";
-import { trackTikTokInitiateCheckout, trackTikTokAddPaymentInfo, trackTikTokPurchase, trackTikTokPlaceAnOrder } from "../../lib/tiktokPixel";
+import { identifyTikTokUser, trackTikTokInitiateCheckout, trackTikTokAddPaymentInfo, trackTikTokPurchase, trackTikTokPlaceAnOrder } from "../../lib/tiktokPixel";
 
 export const CheckoutPageClient: React.FC = () => {
   const [checkoutRequestId] = useState(() => {
@@ -282,6 +282,8 @@ export const CheckoutPageClient: React.FC = () => {
         value: created.total,
         currency: "PKR",
         eventId: metaEventId,
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
       });
 
       trackTikTokPurchase({
@@ -292,6 +294,8 @@ export const CheckoutPageClient: React.FC = () => {
         value: created.total,
         currency: "PKR",
         eventId: metaEventId,
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
       });
     } catch (err) {
       console.error("TikTok tracking error:", err);
@@ -485,6 +489,11 @@ export const CheckoutPageClient: React.FC = () => {
                         placeholder="e.g. 03276655557"
                         value={phone}
                         onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 11))}
+                        onBlur={() => {
+                          if (phone.trim().length > 0) {
+                            identifyTikTokUser({ phone: phone.trim(), email: email.trim() || undefined }).catch(() => {});
+                          }
+                        }}
                         className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 font-sans focus:outline-none focus:ring-2 focus:ring-rose-400"
                       />
                     </div>
@@ -548,12 +557,17 @@ export const CheckoutPageClient: React.FC = () => {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-bold text-slate-700 block mb-1">Email Address (Optional)</label>
+                      <label className="text-xs font-bold text-slate-700 block mb-1">Email Address (for order receipt)</label>
                       <input
                         type="email"
                         placeholder="e.g. ali@example.com"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
+                        onBlur={() => {
+                          if (email.trim().length > 0) {
+                            identifyTikTokUser({ email: email.trim(), phone: phone.trim() || undefined }).catch(() => {});
+                          }
+                        }}
                         className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 font-sans focus:outline-none focus:ring-2 focus:ring-rose-400"
                       />
                     </div>

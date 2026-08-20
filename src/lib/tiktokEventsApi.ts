@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { normalizePakistaniPhoneToE164 } from './tiktokPixel';
 
 const hashData = (data: string | undefined | null) => {
   if (!data) return undefined;
@@ -23,9 +24,10 @@ export const sendTikTokEventToServer = async (
 
   const eventTime = Math.floor(Date.now() / 1000);
 
-  // Extract user info if present in eventData or context (if we have a way to pass email)
+  // Extract user info — normalize phone to E.164 before hashing
   const email = eventData.email ? hashData(eventData.email) : undefined;
-  const phone = eventData.phone ? hashData(eventData.phone) : undefined;
+  const normalizedPhone = normalizePakistaniPhoneToE164(eventData.phone);
+  const phone = normalizedPhone ? hashData(normalizedPhone) : undefined;
   
   // Format the properties payload matching what TikTok expects
   let properties: any = {

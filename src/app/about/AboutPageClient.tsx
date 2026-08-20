@@ -16,7 +16,9 @@ import {
   Truck,
   PackageCheck,
   LayoutGrid,
-  Quote
+  Quote,
+  Mail,
+  BadgeCheck
 } from 'lucide-react';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
@@ -42,7 +44,7 @@ export const AboutPageClient: React.FC = () => {
               Inspiring Young Explorers Every Single Day!
             </h1>
             <p className="text-xs sm:text-base text-white/90 leading-relaxed font-medium">
-              Founded by passionate parents and educators, Play Bimboo exists to nurture creativity, wonder, and STEM problem-solving skills in children through safe, high-quality toys.
+              Founded by a passionate parent and educator, Play Bimboo exists to nurture creativity, wonder, and STEM problem-solving skills in children through safe, high-quality toys.
             </p>
           </div>
         </div>
@@ -98,13 +100,10 @@ export const AboutPageClient: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-4 pt-2">
-              <div className="flex -space-x-4">
-                <img className="w-12 h-12 rounded-full border-4 border-white object-cover bg-slate-200" src="https://i.pravatar.cc/100?img=1" alt="Founder 1" />
-                <img className="w-12 h-12 rounded-full border-4 border-white object-cover bg-slate-200" src="https://i.pravatar.cc/100?img=5" alt="Founder 2" />
-              </div>
+              <img className="w-14 h-14 rounded-full border-4 border-white object-cover bg-slate-200 shadow-sm" src="https://tecnosphere.com.pk/_next/static/media/1731794527039.077be4b7.webp" alt="Abrar Ansari - Founder" />
               <div className="text-xs font-bold text-slate-700">
-                <p>Sarah & James</p>
-                <p className="text-slate-500 font-medium">Co-Founders</p>
+                <p className="flex items-center gap-1">Abrar Ansari <BadgeCheck className="w-3.5 h-3.5 text-sky-500" /></p>
+                <p className="text-slate-500 font-medium">Founder</p>
               </div>
             </div>
           </div>
@@ -164,7 +163,7 @@ export const AboutPageClient: React.FC = () => {
         </div>
 
         {/* ───────────────────────────────────────────── */}
-        {/* NEW SECTION: Trust / Stats Bar */}
+        {/* Trust / Stats Bar */}
         {/* ───────────────────────────────────────────── */}
         <div className="rounded-3xl bg-slate-900 p-8 sm:p-10 mb-16 shadow-xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
@@ -200,7 +199,7 @@ export const AboutPageClient: React.FC = () => {
         </div>
 
         {/* ───────────────────────────────────────────── */}
-        {/* NEW SECTION: Why Choose Play Bimboo */}
+        {/* Why Choose Play Bimboo */}
         {/* ───────────────────────────────────────────── */}
         <div className="mb-16">
           <div className="text-center max-w-xl mx-auto mb-10 space-y-3">
@@ -260,16 +259,89 @@ export const AboutPageClient: React.FC = () => {
         </div>
 
         {/* ───────────────────────────────────────────── */}
-        {/* NEW SECTION: Our Promise Quote */}
+        {/* NEW SECTION: Customer Testimonials */}
         {/* ───────────────────────────────────────────── */}
-        <div className="bg-gradient-to-br from-sky-50 via-white to-rose-50 rounded-3xl border border-slate-100 shadow-sm p-8 sm:p-12 mb-4 text-center relative overflow-hidden">
+        <div className="mb-16">
+          <div className="text-center max-w-xl mx-auto mb-10 space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-500 text-xs font-bold uppercase tracking-wider">
+              <Heart className="w-3.5 h-3.5" />
+              What Parents Say
+            </span>
+            <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-900">
+              Loved by Families Everywhere
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex gap-1 text-amber-400">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                "The STEM kit my son got kept him busy for hours. Great quality and quick delivery too!"
+              </p>
+              <p className="text-xs font-bold text-slate-800">— Ayesha K.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex gap-1 text-amber-400">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                "Love that everything is non-toxic and safety tested. Peace of mind as a parent."
+              </p>
+              <p className="text-xs font-bold text-slate-800">— Bilal R.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex gap-1 text-amber-400">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                "Packaging was so protective, nothing was damaged. Will definitely order again."
+              </p>
+              <p className="text-xs font-bold text-slate-800">— Sana M.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ───────────────────────────────────────────── */}
+        {/* Our Promise Quote */}
+        {/* ───────────────────────────────────────────── */}
+        <div className="bg-gradient-to-br from-sky-50 via-white to-rose-50 rounded-3xl border border-slate-100 shadow-sm p-8 sm:p-12 mb-16 text-center relative overflow-hidden">
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm text-rose-400 flex items-center justify-center mx-auto mb-5">
             <Quote className="w-7 h-7" />
           </div>
           <p className="max-w-2xl mx-auto font-heading font-bold text-base sm:text-xl text-slate-800 leading-relaxed">
             "At Play Bimboo, we're passionate about creating unforgettable childhood moments through fun, safe, and engaging toys — chosen with care, so every playtime becomes a memory worth keeping."
           </p>
-          <p className="mt-5 text-xs font-bold text-slate-500 uppercase tracking-wider">— The Play Bimboo Team</p>
+          <p className="mt-5 text-xs font-bold text-slate-500 uppercase tracking-wider">— Abrar Ansari, Founder</p>
+        </div>
+
+        {/* ───────────────────────────────────────────── */}
+        {/* NEW SECTION: Newsletter CTA */}
+        {/* ───────────────────────────────────────────── */}
+        <div className="bg-gradient-to-r from-amber-400 via-rose-500 to-sky-500 rounded-3xl p-8 sm:p-12 text-white shadow-xl mb-4 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-7 h-7" />
+          </div>
+          <h2 className="font-heading font-black text-2xl sm:text-3xl mb-3">Stay in the Loop</h2>
+          <p className="text-xs sm:text-sm text-white/90 max-w-md mx-auto mb-6">
+            Get early access to new arrivals, exclusive discounts, and fun learning tips — straight to your inbox.
+          </p>
+          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="flex-1 rounded-full px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="rounded-full px-6 py-3 text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all"
+            >
+              Subscribe
+            </button>
+          </form>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api, getAuthToken, removeAuthToken, setAuthToken } from '../services/api';
+import { identifyTikTokUser } from '../lib/tiktokPixel';
 
 interface AuthContextType {
   customerProfile: any | null;
@@ -34,6 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await api.getMe();
       if (profile && profile.role === 'customer') {
         setCustomerProfile(profile);
+        // Fire ttq.identify() so TikTok can match this session to the known user
+        identifyTikTokUser({ email: profile.email, phone: profile.phone }).catch(() => {});
       } else if (profile && profile.role !== 'customer') {
         // If an admin logs in, we might not want to treat them as a customer on the storefront,
         // but for now we can just set them if needed, or leave it as is.
