@@ -203,7 +203,7 @@ export const trackTikTokAddToCart = ({
 };
 
 export const trackTikTokInitiateCheckout = ({
-  items,
+    items,
   value,
   currency = "PKR",
 }: {
