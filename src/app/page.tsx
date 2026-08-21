@@ -6,7 +6,7 @@ export const metadata = {
   description: 'Discover endless play with Play Bimboo! Shop action figures, educational toys, board games, plush soft toys, and outdoor play.',
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = 'https://admin.playbimboo.com/api';
 
 async function fetchData() {
   // Using next: { revalidate: 60 } to cache the homepage for 60 seconds.

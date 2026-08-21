@@ -1,7 +1,5 @@
 // PlayBimboo Unified Backend API Client
-export const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'play-bimboo.vercel.app' 
-  ? 'https://play-bimboo-backend.vercel.app/api'
-  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api');
+export const API_BASE_URL = 'https://admin.playbimboo.com/api';
 
 // Helper for Token Management
 export const getAuthToken = (): string | null => {
@@ -62,7 +60,7 @@ async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T 
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    console.log(`FETCHING FROM: ${API_BASE_URL}${endpoint}`); const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       cache: options?.cache || 'no-store',
       credentials: 'include',
