@@ -757,8 +757,8 @@ export const AdminProductFormPageClient: React.FC = () => {
       )) nextErrors.sku = 'This SKU is already in use.';
     }
 
-    if (weight !== undefined && (!Number.isFinite(weight) || weight < 0)) nextErrors.weight = 'Weight must be zero or greater.';
-    if (deliveryType === 'fixed' && (customDeliveryFee === undefined || customDeliveryFee < 0)) {
+    if (weight != null && (!Number.isFinite(weight) || weight < 0)) nextErrors.weight = 'Weight must be zero or greater.';
+    if (deliveryType === 'fixed' && (customDeliveryFee == null || customDeliveryFee < 0)) {
       nextErrors.customDeliveryFee = 'Enter a non-negative custom shipping fee.';
     }
     if (images.length === 0) nextErrors.images = 'A main product image is required.';
