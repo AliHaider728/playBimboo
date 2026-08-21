@@ -1,5 +1,7 @@
 // PlayBimboo Unified Backend API Client
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://play-bimboo-backend.vercel.app/api' : 'http://localhost:5001/api');
+export const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'play-bimboo.vercel.app' 
+  ? 'https://play-bimboo-backend.vercel.app/api'
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api');
 
 // Helper for Token Management
 export const getAuthToken = (): string | null => {
