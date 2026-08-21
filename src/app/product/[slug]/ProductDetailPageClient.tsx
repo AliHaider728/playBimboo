@@ -264,12 +264,25 @@ export const ProductDetailPageClient: React.FC = () => {
   const currentVariation = useMemo(() => isVariable
     ? product?.variations?.find(variation => {
         if (!variation.enabled) return false;
-        return variationAttributes.length > 0 && variationAttributes.every(attribute => {
-          const selectedValue = selectedAttributes[attribute.slug];
-          return Boolean(selectedValue) && getVariationAttributeValue(variation, attribute) === selectedValue;
-        });
+        if (variationAttributes.length > 0) {
+          return variationAttributes.every(attribute => {
+            const selectedValue = selectedAttributes[attribute.slug];
+            return Boolean(selectedValue) && getVariationAttributeValue(variation, attribute) === selectedValue;
+          });
+        }
+        // Fallback for legacy variants mapping to product_variations
+        if (product.variants && product.variants.length > 0) {
+          return product.variants.every(group => {
+            const optName = selectedVariants[group.name];
+            if (!optName) return false;
+            const optId = group.options.find(o => o.name === optName)?.id;
+            const groupSlug = group.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            return optId && variation.attributes && variation.attributes[groupSlug] === optId;
+          });
+        }
+        return false;
       })
-    : undefined, [isVariable, product?.variations, variationAttributes, selectedAttributes]);
+    : undefined, [isVariable, product?.variations, variationAttributes, selectedAttributes, selectedVariants, product?.variants]);
 
   useEffect(() => {
     if (!isVariable) return;
@@ -440,11 +453,11 @@ export const ProductDetailPageClient: React.FC = () => {
     : variantGroups.every(group => Boolean(selectedVariants[group.name]));
 
   const effectiveAvailable = isVariable
-    ? getEffectiveProductAvailability(product, selectedAttributes)
+    ? getEffectiveProductAvailability(product, variationAttributes.length > 0 ? selectedAttributes : selectedVariants)
     : getEffectiveProductAvailability(product, selectedVariants);
 
   const selectedVariantStock = isVariable
-    ? getEffectiveAvailableQuantity(product, selectedAttributes)
+    ? getEffectiveAvailableQuantity(product, variationAttributes.length > 0 ? selectedAttributes : selectedVariants)
     : getEffectiveAvailableQuantity(product, selectedVariants);
 
   const canPurchase =
@@ -508,7 +521,7 @@ export const ProductDetailPageClient: React.FC = () => {
         addToCart(
           { ...product, price: effectivePrice },
           quantity,
-          undefined,
+          variationAttributes.length === 0 ? formattedVariantString || undefined : undefined,
           currentVariation?.id,
           { appliedOfferLabel, freeUnits, resolvedUnitPrice: effectivePrice }
         );
