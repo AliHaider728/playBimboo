@@ -435,8 +435,8 @@ export const ProductDetailPageClient: React.FC = () => {
   }
 
   const variantGroups = (product.variants || []).filter(group => group.options.length > 0);
-  const allVariantsSelected = isVariable
-    ? variationAttributes.length > 0 && variationAttributes.every(attr => Boolean(selectedAttributes[attr.slug]))
+  const allVariantsSelected = isVariable && variationAttributes.length > 0
+    ? variationAttributes.every(attr => Boolean(selectedAttributes[attr.slug]))
     : variantGroups.every(group => Boolean(selectedVariants[group.name]));
 
   const effectiveAvailable = isVariable
@@ -943,8 +943,8 @@ export const ProductDetailPageClient: React.FC = () => {
                 </div>
               )}
 
-              {/* Legacy Product Variants Selection */}
-              {!isVariable && product.variants && product.variants.length > 0 && (
+              {/* Legacy Product Variants Selection — also shown for variable products with no global attributes */}
+              {(!isVariable || variationAttributes.length === 0) && product.variants && product.variants.length > 0 && (
                 <div className="mb-3 space-y-3 border-t border-slate-100 pt-3">
                   {product.variants.map((vGroup) => (
                     <div key={vGroup.id || vGroup.name} className="space-y-2">
