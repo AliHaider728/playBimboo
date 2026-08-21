@@ -147,7 +147,9 @@ const normalizeCategory = (category: Partial<Category> & MongoRecord): Category 
   itemCount: Number(category.itemCount || 0)
 });
 
-const normalizeOrder = (order: BackendOrder): Order => ({
+const normalizeOrder = (order: BackendOrder): Order => {
+  if (!order) return {} as Order;
+  return {
   ...(order as Order),
   id: String(order.id || order.orderId || order._id || ''),
   date: order.date || order.createdAt || '',
@@ -157,7 +159,8 @@ const normalizeOrder = (order: BackendOrder): Order => ({
   items: Array.isArray(order.items) ? order.items : [],
   discount: order.discount ?? order.discountAmount ?? 0,
   shipping: order.shipping ?? order.deliveryCharge ?? 0
-});
+  };
+};
 
 const normalizeCoupon = (coupon: any): Coupon => ({
   id: String(coupon.id || coupon._id || ''), code: String(coupon.code || ''),
@@ -255,7 +258,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = (typeof window !== 'undefined' ? localStorage.getItem.bind(localStorage) : () => null)('playbimboo_orders');
     const initialOrders = saved ? JSON.parse(saved) : INITIAL_ORDERS;
-    return initialOrders.map(normalizeOrder);
+    return (Array.isArray(initialOrders) ? initialOrders : [])
+      .filter(o => o && (o.id || o.orderId || o._id))
+      .map(normalizeOrder);
   });
 
   const [customers, setCustomers] = useState<Customer[]>(() => {
