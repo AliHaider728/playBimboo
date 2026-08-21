@@ -9,6 +9,7 @@ import {
 
 type InventorySource = {
   trackInventory?: boolean;
+  manageStock?: boolean;
   stockQuantity?: number | null;
   stockStatus?: StockStatus;
   inStock?: boolean;
@@ -27,7 +28,9 @@ export const normalizeInventory = (source: InventorySource): NormalizedInventory
     Number.isInteger(Number(source.stockQuantity)) && Number(source.stockQuantity) >= 0;
   const trackInventory = typeof source.trackInventory === 'boolean'
     ? source.trackInventory
-    : hasQuantity;
+    : typeof source.manageStock === 'boolean'
+      ? source.manageStock
+      : hasQuantity;
   if (trackInventory) {
     const stockQuantity = hasQuantity ? Number(source.stockQuantity) : 0;
     return {
@@ -52,7 +55,19 @@ export const getEffectiveProductAvailability = (
 ) => {
   if (product.productType === 'variable' && product.variations && product.variations.length > 0) {
     if (selectedVariants && Object.keys(selectedVariants).length > 0) {
-      const matched = product.variations.find(v => v.enabled && Object.entries(selectedVariants).every(([k, val]) => v.attributes[k] === val));
+      const matched = product.variations.find(v => {
+        if (!v.enabled) return false;
+        return Object.entries(selectedVariants).every(([k, val]) => {
+          if (v.attributes[k] === val) return true;
+          const group = product.variants?.find(g => g.name === k);
+          if (group) {
+            const optId = group.options.find(o => o.name === val)?.id;
+            const groupSlug = k.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            if (optId && v.attributes && v.attributes[groupSlug] === optId) return true;
+          }
+          return false;
+        });
+      });
       return matched ? normalizeInventory(matched).inStock : false;
     }
     return product.variations.some(v => v.enabled && normalizeInventory(v).inStock);
@@ -74,7 +89,19 @@ export const getEffectiveAvailableQuantity = (
 ): number | undefined => {
   if (product.productType === 'variable' && product.variations && product.variations.length > 0) {
     if (selectedVariants && Object.keys(selectedVariants).length > 0) {
-      const matched = product.variations.find(v => v.enabled && Object.entries(selectedVariants).every(([k, val]) => v.attributes[k] === val));
+      const matched = product.variations.find(v => {
+        if (!v.enabled) return false;
+        return Object.entries(selectedVariants).every(([k, val]) => {
+          if (v.attributes[k] === val) return true;
+          const group = product.variants?.find(g => g.name === k);
+          if (group) {
+            const optId = group.options.find(o => o.name === val)?.id;
+            const groupSlug = k.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            if (optId && v.attributes && v.attributes[groupSlug] === optId) return true;
+          }
+          return false;
+        });
+      });
       if (matched) {
         const inv = normalizeInventory(matched);
         return inv.trackInventory ? inv.stockQuantity : undefined;
