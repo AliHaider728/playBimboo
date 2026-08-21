@@ -174,6 +174,7 @@ export const CheckoutPageClient: React.FC = () => {
       customerName: fullName.trim(),
       email: email.trim(),
       phone: phone.trim(),
+      shippingFee,
       items: cart.map(item => {
         let price = item.product.price;
         let image = item.product.images[0];
