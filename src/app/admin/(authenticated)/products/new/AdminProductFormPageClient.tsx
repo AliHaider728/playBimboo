@@ -397,16 +397,16 @@ export const AdminProductFormPageClient: React.FC = () => {
       : editingProduct.ageGroup ? [editingProduct.ageGroup] : ['6-8']);
     setMaterial(editingProduct.specifications?.Material || '');
     setSafetyInfo(editingProduct.safetyInfo || '');
-    setWeight(editingProduct.weight);
+    setWeight(editingProduct.weight != null ? Number(editingProduct.weight) : undefined);
     setDeliveryType(editingProduct.deliveryType || editingProduct.deliveryChargeType || 'free');
-    setCustomDeliveryFee(editingProduct.customDeliveryFee);
+    setCustomDeliveryFee(editingProduct.customDeliveryFee != null ? Number(editingProduct.customDeliveryFee) : undefined);
     setStatus(editingProduct.status || 'published');
     setIsVisible(editingProduct.isVisible !== false);
     setIsFeatured(editingProduct.isFeatured === true);
     setIsBestseller(editingProduct.isBestseller === true);
     setIsNewArrival(editingProduct.isNewArrival === true);
     setIsSpotlight(editingProduct.isSpotlight === true);
-    setSoldCount(editingProduct.soldCount ?? '');
+    setSoldCount(editingProduct.soldCount != null && String(editingProduct.soldCount) !== '' ? Number(editingProduct.soldCount) : '');
     setImages((editingProduct.images || []).map((url, index) =>
 
       makeImage(
@@ -523,16 +523,16 @@ export const AdminProductFormPageClient: React.FC = () => {
             setAgeGroups(data.ageGroups || []);
             setMaterial(data.material || '');
             setSafetyInfo(data.safetyInfo || '');
-            setWeight(data.weight);
+            setWeight(data.weight != null ? Number(data.weight) : undefined);
             setDeliveryType(data.deliveryType || 'free');
-            setCustomDeliveryFee(data.customDeliveryFee);
+            setCustomDeliveryFee(data.customDeliveryFee != null ? Number(data.customDeliveryFee) : undefined);
             setStatus(data.status || 'published');
             setIsVisible(data.isVisible !== false);
             setIsFeatured(data.isFeatured || false);
             setIsBestseller(data.isBestseller || false);
             setIsNewArrival(data.isNewArrival || false);
             setIsSpotlight(data.isSpotlight || false);
-            setSoldCount(data.soldCount ?? '');
+            setSoldCount(data.soldCount != null && data.soldCount !== '' ? Number(data.soldCount) : '');
             setMetaTitle(data.metaTitle || '');
             setMetaDescription(data.metaDescription || '');
             setProductDetailBlocks(data.productDetailBlocks || []);
