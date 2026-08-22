@@ -308,10 +308,12 @@ export const CheckoutPageClient: React.FC = () => {
     const confirmationEmailSent = Boolean(created.confirmationEmailSentAt && created.confirmationEmailAccepted !== false);
     showToast(!email.trim()
       ? 'Order confirmed successfully.'
-      : confirmationEmailSent
-        ? 'Order confirmed. A confirmation email has been sent.'
-        : 'Order confirmed. We could not send the email, but your order was placed successfully.',
-      !email.trim() || confirmationEmailSent ? 'success' : 'warning');
+      : created.confirmationEmailAccepted === false
+        ? 'Order confirmed. We could not send the email, but your order was placed successfully.'
+        : confirmationEmailSent 
+          ? 'Order confirmed. A confirmation email has been sent.'
+          : 'Order confirmed. You will receive an email shortly.',
+      !email.trim() || created.confirmationEmailAccepted !== false ? 'success' : 'warning');
   };
 
   if (cart.length === 0 && currentStep !== 2) {

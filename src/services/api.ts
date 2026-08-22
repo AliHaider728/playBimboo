@@ -118,7 +118,10 @@ export const api = {
   deleteCategoryWithResolution: (id: string, data: any) => fetchJson<any>(`/categories/${id}`, { method: 'DELETE', body: JSON.stringify(data) }),
 
   // Orders
-  getOrders: (email?: string) => fetchJson<any[]>(`/orders${email ? `?email=${encodeURIComponent(email)}` : ''}`),
+  getOrders: (params?: Record<string, string | number>) => {
+    const q = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return fetchJson<any>(`/orders${q}`);
+  },
   createOrder: (orderData: any) => fetchJson<any>('/orders', { method: 'POST', body: JSON.stringify(orderData) }),
   cancelOrder: (orderId: string) => fetchJson<any>(`/orders/${orderId}/cancel`, { method: 'POST' }),
   updateOrderStatus: (orderId: string, status: string) => fetchJson<any>(`/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),

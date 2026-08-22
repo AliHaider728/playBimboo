@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /checkout
-
-Sitemap: https://playbimboo.com/sitemap.xml

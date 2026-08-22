@@ -2,8 +2,13 @@ export const dynamic = 'force-dynamic';
 import { ProductDetailPageClient } from "./ProductDetailPageClient";
 import { api } from "../../../services/api";
 import { getEffectiveProductAvailability } from "../../../utils/products";
+import { cache } from 'react';
 
 import { notFound } from "next/navigation";
+
+const getCachedProduct = cache(async (slug: string) => {
+  return await api.getProduct(slug);
+});
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
@@ -11,9 +16,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const defaultDesc = "Shop original building sets, STEM robotics, action figures, plush toys, and board games in Pakistan with Cash on Delivery & Free Express Shipping.";
 
   try {
-    const product = await api.getProduct(slug);
+    const product = await getCachedProduct(slug);
     if (!product) {
-      console.error(`[generateMetadata] api.getProduct returned null for slug: ${slug}`);
+      console.error(`[generateMetadata] getCachedProduct returned null for slug: ${slug}`);
       return { title: `${slug} | PlayBimboo` };
     }
 
@@ -47,12 +52,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
-  let schemaData = null;
+  let schemaData: any = null;
+  let product: any = null;
   
   try {
-    const product = await api.getProduct(slug);
+    product = await getCachedProduct(slug);
     if (!product) {
-      console.error(`[Page] api.getProduct returned null for slug: ${slug}`);
+      console.error(`[Page] getCachedProduct returned null for slug: ${slug}`);
       notFound();
     }
     if (product) {
@@ -102,7 +108,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
         />
       )}
-      <ProductDetailPageClient />
+      <ProductDetailPageClient initialProduct={product} />
     </>
   );
 }

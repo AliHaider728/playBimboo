@@ -7,29 +7,63 @@ import { Order } from '../../../../types';
 
 import { formatPrice } from '../../../../utils/formatters';
 import { useDialog } from '../../../../context/DialogContext';
-import { getLastApiError } from '../../../../services/api';
+import { api, getLastApiError } from '../../../../services/api';
 
 export const AdminOrdersPageClient: React.FC = () => {
-  const { orders, updateOrderStatus, updateOrderTracking, deleteOrder, settings } = useStore();
+  const { updateOrderStatus, updateOrderTracking, deleteOrder, settings } = useStore();
   const { showToast } = useToast();
   const { confirm } = useDialog();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchVal, setSearchVal] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [trackingInput, setTrackingInput] = useState('');
   const [updatingOrderId, setUpdatingOrderId] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const ITEMS_PER_PAGE = 25;
 
-  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-  const filteredOrders = orders.filter(o => {
-    const matchesTab = activeTab === 'All' || o.status === activeTab;
-    const matchesSearch = [o.id, o.customerName, o.email, o.status].some(value =>
-      (value || '').toLowerCase().includes(normalizedSearchQuery)
-    );
-    return matchesTab && matchesSearch;
-  });
+  const fetchServerOrders = React.useCallback(async () => {
+    setIsLoadingOrders(true);
+    try {
+      const result = await api.getOrders({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+        search: searchVal,
+        status: activeTab === 'All' ? 'all' : activeTab
+      });
+      if (result && result.orders) {
+        setFilteredOrders(result.orders);
+        setTotalPages(result.totalPages || 1);
+        setTotalCount(result.totalCount || 0);
+      } else if (Array.isArray(result)) {
+        setFilteredOrders(result);
+        setTotalPages(1);
+        setTotalCount(result.length);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setIsLoadingOrders(false);
+  }, [currentPage, searchVal, activeTab]);
+
+  React.useEffect(() => {
+    fetchServerOrders();
+  }, [fetchServerOrders]);
+
+  React.useEffect(() => {
+    const t = setTimeout(() => { setSearchVal(searchQuery); setCurrentPage(1); }, 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  React.useEffect(() => { setCurrentPage(1); }, [activeTab]);
 
   const handleBulkStatusChange = async (newStatus: Order['status']) => {
     const accepted = await confirm({
@@ -45,6 +79,7 @@ export const AdminOrdersPageClient: React.FC = () => {
       const result = await updateOrderStatus(orderId, newStatus);
       if (result) successCount++;
     }
+    if (successCount > 0) fetchServerOrders();
     setIsBulkUpdating(false);
     
     if (successCount === selectedOrderIds.size) {
@@ -70,6 +105,7 @@ export const AdminOrdersPageClient: React.FC = () => {
       const result = await deleteOrder(orderId);
       if (result) successCount++;
     }
+    if (successCount > 0) fetchServerOrders();
     setIsBulkUpdating(false);
 
     if (successCount === selectedOrderIds.size) {
@@ -112,6 +148,7 @@ export const AdminOrdersPageClient: React.FC = () => {
     setUpdatingOrderId(order.id);
     const result = await updateOrderStatus(order.id, newStatus);
     setUpdatingOrderId('');
+    if (result) fetchServerOrders();
     if (!result) { showToast(getLastApiError() || 'Order update failed.', 'error'); return; }
     const notification = result.notification || {};
     if (isDelivered) {
@@ -127,6 +164,7 @@ export const AdminOrdersPageClient: React.FC = () => {
   const handleSaveTracking = async (orderId: string) => {
     if (!trackingInput.trim()) return;
     const updated = await updateOrderTracking(orderId, trackingInput.trim());
+    if (updated) fetchServerOrders();
     if (!updated) { showToast(getLastApiError() || 'Could not save the tracking code.', 'error'); return; }
     showToast(`Tracking code saved for ${orderId}.`, 'success');
     if (selectedOrder) setSelectedOrder(updated);
@@ -142,6 +180,7 @@ export const AdminOrdersPageClient: React.FC = () => {
     if (!accepted) return;
     
     const result = await deleteOrder(order.id);
+    if (result) fetchServerOrders();
     if (!result) { showToast(getLastApiError() || 'Failed to delete order.', 'error'); return; }
     showToast(`Order ${order.id} deleted successfully.`, 'success');
   };
@@ -345,6 +384,27 @@ export const AdminOrdersPageClient: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Pagination UI */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-6 py-4 bg-white border border-slate-200/80 shadow-xs rounded-3xl mt-4">
+          <div className="text-xs text-slate-500 font-medium">
+            Showing <span className="font-bold text-slate-700">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-bold text-slate-700">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of <span className="font-bold text-slate-700">{totalCount}</span> orders
+          </div>
+          <div className="flex gap-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >Previous</button>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >Next</button>
+          </div>
+        </div>
+      )}
 
       {/* Order Detail Modal */}
       {selectedOrder && (

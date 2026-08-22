@@ -63,12 +63,12 @@ declare global {
   }
 }
 
-export const ProductDetailPageClient: React.FC = () => {
+export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ initialProduct }) => {
   const { slug } = useParams<{ slug: string }>();
   const { products, productsLoading, addToCart, toggleWishlist, isInWishlist, refreshProducts, settings, submitCustomerReview } = useStore();
   const { showToast } = useToast();
 
-  const product = products.find(
+  const product = initialProduct || products.find(
     p => (p.slug === slug || p.id === slug) && isProductVisibleOnStorefront(p)
   );
 
