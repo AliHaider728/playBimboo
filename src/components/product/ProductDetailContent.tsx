@@ -183,7 +183,7 @@ export const ProductDetailContent: React.FC<{ product: Product }> = ({ product }
       data-product-slug={product.slug}
       aria-label="Additional product information"
     >
-      {product.productDetailScopedCss && <style>{product.productDetailScopedCss}</style>}
+      {product.productDetailCustomCss && <style>{product.productDetailCustomCss}</style>}
       <style>{productDetailPolishCss}</style>
       {blocks.map(block => {
         const width = block.settings?.width === 'medium' ? 'max-w-3xl' : block.settings?.width === 'large' ? 'max-w-5xl' : 'max-w-none';
