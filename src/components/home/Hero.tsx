@@ -47,11 +47,11 @@ export const Hero: React.FC<{ sectionSettings: any }> = ({ sectionSettings }) =>
             </Link>
 
             <Link
-              href="/category/educational-stem"
+              href="#spotlight"
               className="w-full sm:w-auto px-8 py-4 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-heading font-extrabold text-base border border-slate-200 shadow-[0_4px_14px_rgba(0,0,0,0.05)] flex items-center justify-center gap-2 transition-all"
             >
               <Gift className="w-5 h-5 text-sky-500" />
-              <span>Shop STEM & Learning</span>
+              <span>See Spotlight</span>
             </Link>
           </div>
 

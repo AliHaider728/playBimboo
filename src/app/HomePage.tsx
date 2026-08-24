@@ -45,7 +45,7 @@ export const HomePage: React.FC<Props> = ({ products, categories, settings }) =>
       <Hero sectionSettings={sectionByKey.hero} />
 
       {spotlightProduct && (
-        <div style={{ order: (sectionByKey.hero?.order ?? 0) + 0.5 }} className="mt-10 sm:mt-16 lg:mt-20">
+        <div id="spotlight" style={{ order: (sectionByKey.hero?.order ?? 0) + 0.5 }} className="mt-10 sm:mt-16 lg:mt-20">
           <ProductSpotlight product={spotlightProduct} />
         </div>
       )}
