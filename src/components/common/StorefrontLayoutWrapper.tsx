@@ -1,11 +1,13 @@
 "use client";
 import React from 'react';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { CartDrawer } from '../cart/CartDrawer';
 import { MobileBottomNav } from './MobileBottomNav';
-import { FloatingWhatsApp } from './FloatingWhatsApp';
+
+const CartDrawer = dynamic(() => import('../cart/CartDrawer').then(mod => mod.CartDrawer), { ssr: false });
+const FloatingWhatsApp = dynamic(() => import('./FloatingWhatsApp').then(mod => mod.FloatingWhatsApp), { ssr: false });
 
 export const StorefrontLayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();

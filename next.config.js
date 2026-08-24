@@ -16,6 +16,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
 
   webpack(config) {
     config.module.rules.push({

@@ -4,8 +4,7 @@ import '../index.css';
 import { Providers } from './Providers';
 import { AuthModalWrapper } from './AuthModalWrapper';
 import { StorefrontLayoutWrapper } from '../components/common/StorefrontLayoutWrapper';
-import MetaPixel from '../components/analytics/MetaPixel';
-import TikTokPixel from '../components/analytics/TikTokPixel';
+import { DelayedScripts } from '../components/analytics/DelayedScripts';
 import { Fredoka, Plus_Jakarta_Sans } from 'next/font/google';
 
 const fredoka = Fredoka({ 
@@ -38,59 +37,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <Script
-          id="meta-pixel-stub"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-              n.queue=[];}(window,document,'script');
-            `,
-          }}
-        />
-        <Script
-          id="gtm-script"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','GTM-M49DLCLB');
-            `,
-          }}
-        />
-
-        {GA_MEASUREMENT_ID && (
-          <Script
-            id="google-analytics-stub"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false }); // PageView handled by lazy load
-              `,
-            }}
-          />
-        )}
-        
-        {GA_MEASUREMENT_ID && (
-          <Script
-            strategy="lazyOnload"
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          />
-        )}
       </head>
       <body className={`font-sans antialiased bg-slate-50 text-slate-800 selection:bg-amber-200 selection:text-amber-900 ${fredoka.variable} ${plusJakartaSans.variable}`}>
         <noscript>
@@ -101,8 +50,7 @@ export default function RootLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
-        <MetaPixel />
-          <TikTokPixel />
+        <DelayedScripts />
         <Providers>
           <AuthModalWrapper />
           <StorefrontLayoutWrapper>
