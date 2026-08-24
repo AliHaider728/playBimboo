@@ -301,7 +301,9 @@ export const AdminOrdersPageClient: React.FC = () => {
                   <td className="p-4 font-heading font-bold text-slate-900">{order.id}</td>
                   <td className="p-4">
                     <span className="font-bold text-slate-800 block">{order.customerName}</span>
-                    <span className="text-[10px] text-slate-400">{order.email}</span>
+                    {order.email && order.email !== 'null' && (
+                      <span className="text-[10px] text-slate-400">{order.email}</span>
+                    )}
                   </td>
                   <td className="p-4">
                     <div className="flex flex-col gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
