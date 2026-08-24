@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Heart, ShoppingBag, Eye, Check, Loader2 } from 'lucide-react';
@@ -154,14 +155,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
           className={`flex h-full w-full items-center justify-center ${compact ? 'p-2.5' : 'p-3 sm:p-4'}`}
           aria-label={`View ${product.name}`}
         >
-          <img
+          <Image
             src={getSafeImageSrc(cardImageUrl, { width: 600 })}
             alt={product.name}
-            width={600}
-            height={600}
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={priority}
+            className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.06]"
           />
         </Link>
 

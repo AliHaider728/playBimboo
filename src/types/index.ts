@@ -393,6 +393,7 @@ export interface StoreSettings {
   taxRate: number;
   storefrontNavigation: StorefrontNavigationItem[];
   homepageSections: HomepageSectionSetting[];
+  homepageLayout?: { key: string; isVisible: boolean; order: number }[];
   socialLinks?: {
     instagram?: string;
     facebook?: string;

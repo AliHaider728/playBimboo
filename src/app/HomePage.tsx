@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { SeoHead } from '../components/common/SeoHead';
 import { ProductSpotlight } from '../components/home/ProductSpotlight';
 import { Product, Category, StoreSettings } from '../types';
@@ -32,30 +32,70 @@ export const HomePage: React.FC<Props> = ({ products, categories, settings }) =>
     return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
   });
   const newArrivals = markedNewArrivals.length > 0 ? markedNewArrivals : recentProducts;
-  const spotlightProduct = visibleProducts.find(p => p.isSpotlight);
-  const sectionByKey = Object.fromEntries(settings.homepageSections.map(section => [section.key, section]));
+  const spotlightProduct = visibleProducts.find(p => p.category === 'educational-stem') || visibleProducts[0];
+
+  const sectionByKey = Object.fromEntries((settings?.homepageSections || []).map(section => [section.key, section]));
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
       <SeoHead
-        title="Playful Toys & Games Store"
-        description="Shop top-rated STEM toys, building sets, action figures, soft plushies, and board games for kids of all ages. Safe, non-toxic & fast delivery!"
+        title="Play Bimboo - Premium RC Toys, Drones & Educational Games"
+        description="Discover premium remote control cars, stunt drones, and STEM educational toys. Fast shipping, 30-day returns, and quality guaranteed."
       />
 
-      <Hero sectionSettings={sectionByKey.hero} />
-
-      {spotlightProduct && (
-        <div id="spotlight" style={{ order: (sectionByKey.hero?.order ?? 0) + 0.5 }} className="mt-10 sm:mt-16 lg:mt-20">
-          <ProductSpotlight product={spotlightProduct} />
+      {sectionByKey.hero?.enabled && (
+        <div style={{ order: sectionByKey.hero.order }}>
+          <Hero sectionSettings={sectionByKey.hero} />
         </div>
       )}
 
-      <Categories categories={categories} sectionSettings={sectionByKey.categories} />
-      <AgeGroups sectionSettings={sectionByKey.ageGroups} />
-      <BrandCampaign sectionSettings={sectionByKey.brandCampaign} />
+      {spotlightProduct && (
+        <div style={{ order: (sectionByKey.hero?.order ?? 0) + 0.5 }}>
+          <div id="spotlight" className="mt-10 sm:mt-16 lg:mt-20">
+            <ProductSpotlight product={spotlightProduct} />
+          </div>
+        </div>
+      )}
+
+      {sectionByKey.categories?.enabled && (
+        <div style={{ order: sectionByKey.categories.order }}>
+          <div className="mt-16 sm:mt-24 lg:mt-32">
+            <Categories categories={categories} sectionSettings={sectionByKey.categories} />
+          </div>
+        </div>
+      )}
       
-      <FeaturedProductsClient products={featuredProducts} sectionSettings={sectionByKey.featuredProducts} />
-      <NewArrivalsClient products={newArrivals} sectionSettings={sectionByKey.newArrivals} />
+      {sectionByKey.ageGroups?.enabled && (
+        <div style={{ order: sectionByKey.ageGroups.order }}>
+          <div className="mt-16 sm:mt-24 lg:mt-32">
+            <AgeGroups sectionSettings={sectionByKey.ageGroups} />
+          </div>
+        </div>
+      )}
+
+      {sectionByKey.brandCampaign?.enabled && (
+        <div style={{ order: sectionByKey.brandCampaign.order }}>
+          <div className="mt-16 sm:mt-24 lg:mt-32">
+            <BrandCampaign sectionSettings={sectionByKey.brandCampaign} />
+          </div>
+        </div>
+      )}
+
+      {sectionByKey.featuredProducts?.enabled && (
+        <div style={{ order: sectionByKey.featuredProducts.order }}>
+          <div className="mt-16 sm:mt-24 lg:mt-32">
+            <FeaturedProductsClient products={featuredProducts} sectionSettings={sectionByKey.featuredProducts} />
+          </div>
+        </div>
+      )}
+
+      {sectionByKey.newArrivals?.enabled && (
+        <div style={{ order: sectionByKey.newArrivals.order }}>
+          <div className="mt-16 sm:mt-24 lg:mt-32 mb-16 sm:mb-24">
+            <NewArrivalsClient products={newArrivals} sectionSettings={sectionByKey.newArrivals} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

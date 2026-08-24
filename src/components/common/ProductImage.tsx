@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { getSafeImageSrc } from '../../utils/images';
 
 interface ProductImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -34,13 +35,14 @@ export const ProductImage: React.FC<ProductImageProps> = ({
       />
       
       {/* Actual image */}
-      <img
+      <Image
         src={safeSrc}
         alt={alt}
-        loading={loading}
+        fill
+        sizes={props.sizes || "(max-width: 768px) 100vw, 50vw"}
+        priority={loading === 'eager'}
         onLoad={() => setIsLoaded(true)}
-        className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
-        {...props}
+        className={`object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
       />
     </div>
   );

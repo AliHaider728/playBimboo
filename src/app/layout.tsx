@@ -45,7 +45,7 @@ export default function RootLayout({
       <head>
         <Script
           id="meta-pixel-stub"
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               !function(f,b,e,v,n,t,s)
@@ -73,7 +73,7 @@ export default function RootLayout({
         {GA_MEASUREMENT_ID && (
           <Script
             id="google-analytics-stub"
-            strategy="beforeInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
                 window.dataLayer = window.dataLayer || [];

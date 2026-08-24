@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { ArrowRight, Check, Loader2, PackageCheck, ShoppingBag, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useStore } from '../../context/StoreContext';
@@ -120,11 +121,14 @@ export const ProductSpotlight: React.FC<{ product: Product }> = ({ product }) =>
         <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-rose-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-sky-400/20 blur-3xl" />
         <div className="relative grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-          <Link href={`/product/${product.slug}`} className="group block w-full overflow-hidden rounded-[26px] shadow-xl" aria-label={`View ${product.name}`}>
-            <img
+          <Link href={`/product/${product.slug}`} className="group block w-full overflow-hidden rounded-[26px] shadow-xl relative aspect-square" aria-label={`View ${product.name}`}>
+            <Image
               src={getSafeImageSrc(product.images?.[0], { width: 600 })}
               alt={product.name}
-              className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.025]"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+              loading="lazy"
             />
           </Link>
 
