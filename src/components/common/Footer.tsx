@@ -54,11 +54,33 @@ export const Footer: React.FC = () => {
     }
   };
 
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const footerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsFooterVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    
+    if (footerRef.current) {
+      observer.observe(footerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <footer className="relative overflow-hidden bg-black pb-6 pt-10 font-sans text-slate-300 sm:pt-12">
+    <footer ref={footerRef} className="relative overflow-hidden bg-black pb-6 pt-10 font-sans text-slate-300 sm:pt-12">
       {/* Ballpit background animation — sits behind everything, doesn't block clicks */}
       <div className="pointer-events-none absolute inset-0 z-0 opacity-30" aria-hidden="true">
-        <Ballpit
+        {isFooterVisible && (
+          <Ballpit
           count={60}
           gravity={0}
           friction={0.998}
@@ -72,6 +94,7 @@ export const Footer: React.FC = () => {
           ambientIntensity={1.4}
           lightIntensity={300}
         />
+        )}
       </div>
 
       {/* Light dark overlay — just enough to keep text readable without hiding the balls */}

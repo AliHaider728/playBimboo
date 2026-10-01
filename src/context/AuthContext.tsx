@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await api.login(email, password);
       if (result && result.token) {
         setAuthToken(result.token);
-        await refreshProfile();
+        // refreshProfile will be called by the pb-auth-changed event listener
         return true;
       }
       return false;
@@ -88,21 +88,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthModalOpen(false);
   };
 
+  const contextValue = React.useMemo(() => ({
+    customerProfile,
+    isLoggedIn: !!customerProfile,
+    isLoading,
+    isAuthModalOpen,
+    openAuthModal,
+    closeAuthModal,
+    authModalMode,
+    login,
+    logout,
+    refreshProfile
+  }), [customerProfile, isLoading, isAuthModalOpen, authModalMode]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        customerProfile,
-        isLoggedIn: !!customerProfile,
-        isLoading,
-        isAuthModalOpen,
-        openAuthModal,
-        closeAuthModal,
-        authModalMode,
-        login,
-        logout,
-        refreshProfile
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

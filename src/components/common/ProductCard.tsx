@@ -28,7 +28,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
   const router = useRouter();
   const [cartActionState, setCartActionState] = useState<'idle' | 'adding' | 'added'>('idle');
   const cartActionLocked = useRef(false);
-  const addTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isWishlisted = isInWishlist(product.id);
   const thumbnailUrl = product.imageThumbnailUrls?.[0]?.trim();
@@ -43,7 +42,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
   const compact = layout === 'compact';
 
   useEffect(() => () => {
-    if (addTimerRef.current) clearTimeout(addTimerRef.current);
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
   }, []);
 
@@ -102,7 +100,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
   const performAddToCart = (variationToUse: any) => {
     cartActionLocked.current = true;
     setCartActionState('adding');
-    addTimerRef.current = setTimeout(() => {
       if (variationToUse) {
         addToCart(product, 1, JSON.stringify(variationToUse.attributes), variationToUse.id);
       } else {
@@ -135,7 +132,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
         cartActionLocked.current = false;
         setCartActionState('idle');
       }, 900);
-    }, 180);
   };
 
 

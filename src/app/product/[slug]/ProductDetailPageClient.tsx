@@ -81,7 +81,6 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'safety' | 'reviews'>('desc');
   const [cartActionState, setCartActionState] = useState<'idle' | 'adding' | 'added'>('idle');
   const cartActionLocked = React.useRef(false);
-  const addTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState('50% 50%');
@@ -92,7 +91,6 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
   const lightboxTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   useEffect(() => () => {
-    if (addTimerRef.current) clearTimeout(addTimerRef.current);
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
   }, []);
 
@@ -490,7 +488,6 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
     if (cartActionLocked.current) return;
     cartActionLocked.current = true;
     setCartActionState('adding');
-    addTimerRef.current = setTimeout(() => {
       // Derive effective price based on selected quantity
       let effectivePrice = currentPrice;
       let qbLabel = '';
@@ -556,7 +553,6 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
         cartActionLocked.current = false;
         setCartActionState('idle');
       }, 900);
-    }, 180);
   };
 
   const handleToggleWishlist = () => {

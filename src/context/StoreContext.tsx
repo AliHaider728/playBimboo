@@ -401,40 +401,31 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => window.removeEventListener('pb-auth-changed', fetchAdminData);
   }, []);
 
-  // Sync to localStorage
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_categories', JSON.stringify(categories));
-  }, [categories]);
-
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_customers', JSON.stringify(customers));
-  }, [customers]);
-
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_coupons', JSON.stringify(coupons));
-  }, [coupons]);
-
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_reviews', JSON.stringify(reviews));
-  }, [reviews]);
-
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_settings', JSON.stringify(settings));
-  }, [settings]);
-
-  useEffect(() => {
-    if (isCartHydrated) {
-      (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_cart', JSON.stringify(cart));
+  // Debounced local storage sync
+  const saveToStorage = React.useCallback((key: string, data: any) => {
+    if (typeof window === 'undefined') return;
+    if (typeof window.requestIdleCallback !== 'undefined') {
+      window.requestIdleCallback(() => {
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+      });
+    } else {
+      setTimeout(() => {
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+      }, 50);
     }
-  }, [cart, isCartHydrated]);
+  }, []);
+
+  // Sync to localStorage
+  useEffect(() => { saveToStorage('playbimboo_products', products); }, [products, saveToStorage]);
+  useEffect(() => { saveToStorage('playbimboo_categories', categories); }, [categories, saveToStorage]);
+  useEffect(() => { saveToStorage('playbimboo_orders', orders); }, [orders, saveToStorage]);
+  useEffect(() => { saveToStorage('playbimboo_customers', customers); }, [customers, saveToStorage]);
+  useEffect(() => { saveToStorage('playbimboo_coupons', coupons); }, [coupons, saveToStorage]);
+  useEffect(() => { saveToStorage('playbimboo_reviews', reviews); }, [reviews, saveToStorage]);
+  useEffect(() => { saveToStorage('playbimboo_settings', settings); }, [settings, saveToStorage]);
+  useEffect(() => {
+    if (isCartHydrated) saveToStorage('playbimboo_cart', cart);
+  }, [cart, isCartHydrated, saveToStorage]);
 
   useEffect(() => {
     const syncCartFromAnotherTab = (event: StorageEvent) => {
@@ -449,9 +440,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => window.removeEventListener('storage', syncCartFromAnotherTab);
   }, []);
 
-  useEffect(() => {
-    (typeof window !== 'undefined' ? localStorage.setItem.bind(localStorage) : () => {})('playbimboo_wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
+  useEffect(() => { saveToStorage('playbimboo_wishlist', wishlist); }, [wishlist, saveToStorage]);
 
   // Prune wishlist so it only ever reflects REAL, currently-existing products.
   // This clears out any stale/ghost IDs left over from old mock data or
@@ -590,11 +579,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setAppliedCoupon(null);
   };
 
-  const cartTotalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const cartSubtotal = cart.reduce((acc, item) => {
-    let price = item.resolvedUnitPrice !== undefined ? item.resolvedUnitPrice : getBasePrice(item);
-    return acc + price * item.quantity;
-  }, 0);
+  const cartTotalItems = React.useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
+  const cartSubtotal = React.useMemo(() => {
+    return cart.reduce((acc, item) => {
+      let price = item.resolvedUnitPrice !== undefined ? item.resolvedUnitPrice : getBasePrice(item);
+      return acc + price * item.quantity;
+    }, 0);
+  }, [cart]);
 
   // Coupon application logic
   const applyCoupon = async (code: string) => {
@@ -673,7 +664,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const normalizedProduct = normalizeProduct(savedProduct);
     setProducts(prev => [normalizedProduct, ...prev]);
-    await refreshProducts();
     return normalizedProduct;
   };
 
@@ -683,7 +673,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const normalizedProduct = normalizeProduct(savedProduct);
     setProducts(prev => prev.map(p => (p.id === id ? normalizedProduct : p)));
-    await refreshProducts();
     return normalizedProduct;
   };
 
@@ -707,7 +696,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!saved) return null;
     const normalized = normalizeCategory(saved);
     setCategories(current => current.map(item => item.id === id ? normalized : item).sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)));
-    await refreshProducts();
     return normalized;
   };
 
@@ -715,6 +703,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const result = await api.deleteCategoryWithResolution(id, resolution);
     if (!result) return null;
     setCategories(current => current.filter(item => item.id !== id));
+    // Category deletion might affect products, so we keep this refreshProducts call or just let admin refresh
     await refreshProducts();
     const appearance = await api.getSettings();
     if (appearance) updateAppearanceSettings(appearance);
@@ -726,7 +715,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!result) return null;
     const updated = normalizeOrder(result.order || result);
     setOrders(current => current.map(order => order.id === orderId ? updated : order));
-    await refreshProducts();
     return { ...result, order: updated };
   };
 
@@ -756,12 +744,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const savedOrder = response.order ? response.order : response;
 
     if (response.token && typeof window !== 'undefined') {
-      setAuthToken(response.token);
+      // Defer auth token update slightly so it doesn't race condition with local state updates
+      setTimeout(() => setAuthToken(response.token), 100);
     }
 
     const newOrder = normalizeOrder(savedOrder);
     setOrders(prev => [newOrder, ...prev]);
-    await refreshProducts();
 
     // Update customer total spent
     setCustomers(prev => {
