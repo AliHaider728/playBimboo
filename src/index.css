@@ -19,6 +19,23 @@
   html {
     @apply font-sans;
   }
+  
+  button, 
+  [role="button"], 
+  input[type="submit"], 
+  input[type="button"],
+  select,
+  label {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 }
 
 .font-heading {
