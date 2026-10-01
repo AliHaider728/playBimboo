@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ProductCard } from '../common/ProductCard';
-import { QuickViewModal } from './QuickViewModal';
+import dynamic from 'next/dynamic';
 import { useStore } from '../../context/StoreContext';
 import { Product } from '../../types';
 
@@ -10,6 +10,8 @@ interface Props {
   products: Product[];
   sectionSettings: any;
 }
+
+const QuickViewModal = dynamic(() => import('./QuickViewModal').then(module => module.QuickViewModal));
 
 export const NewArrivalsClient: React.FC<Props> = ({ products, sectionSettings }) => {
   const { addToCart } = useStore();

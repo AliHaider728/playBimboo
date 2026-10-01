@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { ProductCard } from '../../components/common/ProductCard';
+import { SkeletonCard } from '../../components/common/SkeletonCard';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
 import { isProductVisibleOnStorefront } from '../../utils/products';
@@ -13,7 +14,7 @@ import { trackTikTokSearch } from '../../lib/tiktokPixel';
 function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const { products } = useStore();
+  const { products, productsLoading, productsError, refreshProducts } = useStore();
 
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high'>('featured');
 
@@ -23,20 +24,23 @@ function SearchResultsContent() {
     }
   }, [query]);
 
-  const results = products.filter(p =>
+  const results = useMemo(() => {
+    const term = query.toLowerCase();
+    return products.filter(p =>
     isProductVisibleOnStorefront(p) && (
-      p.name.toLowerCase().includes(query.toLowerCase()) ||
-      (p.categoryNames?.length ? p.categoryNames : [p.category]).some(category => category.toLowerCase().includes(query.toLowerCase())) ||
-      p.brand.toLowerCase().includes(query.toLowerCase()) ||
-      p.tags.some(t => t.toLowerCase().includes(query.toLowerCase()))
+      p.name.toLowerCase().includes(term) ||
+      (p.categoryNames?.length ? p.categoryNames : [p.category]).some(category => category.toLowerCase().includes(term)) ||
+      p.brand.toLowerCase().includes(term) ||
+      p.tags.some(t => t.toLowerCase().includes(term))
     )
   );
+  }, [products, query]);
 
-  const sortedResults = [...results].sort((a, b) => {
+  const sortedResults = useMemo(() => [...results].sort((a, b) => {
     if (sortBy === 'price-low') return a.price - b.price;
     if (sortBy === 'price-high') return b.price - a.price;
     return 0;
-  });
+  }), [results, sortBy]);
 
   const breadcrumbItems = [
     { label: 'Search Results' }
@@ -73,7 +77,16 @@ function SearchResultsContent() {
           </div>
         )}
 
-        {sortedResults.length === 0 ? (
+        {productsLoading && products.length === 0 ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2" aria-label="Loading search results">
+            {Array.from({ length: 4 }, (_, index) => <SkeletonCard key={index} />)}
+          </div>
+        ) : productsError && products.length === 0 ? (
+          <div className="rounded-3xl border border-slate-100 bg-white p-12 text-center">
+            <p className="text-sm text-slate-600">The catalog is temporarily unavailable.</p>
+            <button onClick={() => void refreshProducts()} className="mt-4 rounded-xl bg-rose-500 px-5 py-2 text-sm font-bold text-white">Try again</button>
+          </div>
+        ) : sortedResults.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 space-y-4">
             <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
               <Search className="w-8 h-8" />

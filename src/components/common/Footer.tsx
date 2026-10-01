@@ -55,7 +55,17 @@ export const Footer: React.FC = () => {
   };
 
   const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [allowAnimation, setAllowAnimation] = useState(false);
   const footerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    const updateAnimationPreference = () => setAllowAnimation(!reducedMotion.matches && !connection?.saveData);
+    updateAnimationPreference();
+    reducedMotion.addEventListener('change', updateAnimationPreference);
+    return () => reducedMotion.removeEventListener('change', updateAnimationPreference);
+  }, []);
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
@@ -79,7 +89,7 @@ export const Footer: React.FC = () => {
     <footer ref={footerRef} className="relative overflow-hidden bg-black pb-6 pt-10 font-sans text-slate-300 sm:pt-12">
       {/* Ballpit background animation — sits behind everything, doesn't block clicks */}
       <div className="pointer-events-none absolute inset-0 z-0 opacity-30" aria-hidden="true">
-        {isFooterVisible && (
+        {isFooterVisible && allowAnimation && (
           <Ballpit
           count={60}
           gravity={0}

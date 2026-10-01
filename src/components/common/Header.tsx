@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useDeferredValue } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import {
@@ -27,6 +27,7 @@ export const Header: React.FC = () => {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [openMenuId, setOpenMenuId] = useState('');
   
@@ -41,18 +42,20 @@ export const Header: React.FC = () => {
   const desktopRoots = desktopNavigation.filter(item => !item.parentId);
 
   // Filter search autosuggest results
-  const searchResults = searchQuery.trim()
-    ? products
+  const searchResults = useMemo(() => {
+    const term = deferredSearchQuery.trim().toLowerCase();
+    return term ? products
         .filter(p =>
           isProductVisibleOnStorefront(p) && (
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+            p.name.toLowerCase().includes(term) ||
+            p.category.toLowerCase().includes(term) ||
+            p.brand.toLowerCase().includes(term) ||
+            p.tags.some(t => t.toLowerCase().includes(term))
           )
         )
         .slice(0, 5)
     : [];
+  }, [products, deferredSearchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

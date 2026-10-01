@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Product,
   ProductInput,
@@ -174,6 +175,7 @@ export interface StoreContextType {
   // Data
   products: Product[];
   productsLoading: boolean;
+  productsError: boolean;
   categories: Category[];
   orders: Order[];
   customers: Customer[];
@@ -207,7 +209,7 @@ export interface StoreContextType {
   addProduct: (productData: ProductInput) => Promise<Product | null>;
   updateProduct: (id: string, productData: Partial<ProductInput>) => Promise<Product | null>;
   deleteProduct: (id: string) => Promise<boolean>;
-  refreshProducts: () => Promise<void>;
+  refreshProducts: () => Promise<boolean>;
 
   refreshCategories: () => Promise<Category[]>;
   addCategory: (categoryData: Partial<Category>) => Promise<Category | null>;
@@ -240,6 +242,9 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { showToast } = useToast();
+  const pathname = usePathname();
+  const isAdminPage = Boolean(pathname?.startsWith('/admin'));
+  const needsAccountData = isAdminPage || pathname === '/account';
 
   // LocalStorage state initialization
   const [products, setProducts] = useState<Product[]>(() => {
@@ -248,6 +253,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return initialProducts.map(normalizeProduct);
   });
   const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>(() => {
     const saved = (typeof window !== 'undefined' ? localStorage.getItem.bind(localStorage) : () => null)('playbimboo_categories');
@@ -318,8 +324,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const refreshProducts = async () => {
+    setProductsLoading(true);
     const realProducts = await api.getProducts();
     if (realProducts) setProducts(realProducts.map(normalizeProduct));
+    setProductsError(!realProducts);
+    setProductsLoading(false);
+    return Boolean(realProducts);
   };
 
   const refreshCategories = async () => {
@@ -360,14 +370,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setReviews([]);
           return; // Nothing more to fetch for guests
         }
-        const [
-          realOrders,
-          realCustomers,
-          realCoupons
-        ] = await Promise.all([
+        if (!needsAccountData) return;
+        const [realOrders, realCustomers, realCoupons] = await Promise.all([
           api.getOrders(),
-          api.getCustomers(),
-          api.getCoupons()
+          isAdminPage ? api.getCustomers() : Promise.resolve(null),
+          isAdminPage ? api.getCoupons() : Promise.resolve(null)
         ]);
 
         if (realOrders) setOrders(realOrders.map(normalizeOrder));
@@ -378,7 +385,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     };
 
-    // ─── Public data (products + categories) — always fetch ───
+    void fetchAdminData();
+    window.addEventListener('pb-auth-changed', fetchAdminData);
+    return () => window.removeEventListener('pb-auth-changed', fetchAdminData);
+  }, [needsAccountData, isAdminPage]);
+
+  useEffect(() => {
+    // Public catalog refreshes once when the provider mounts.
     const fetchPublicData = async () => {
       try {
         const hasAdminSession = Boolean(getAuthToken());
@@ -387,18 +400,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           hasAdminSession && isSuperAdmin() ? api.getAdminCategories() : api.getCategories()
         ]);
         if (realProducts) setProducts(realProducts.map(normalizeProduct));
+        setProductsError(!realProducts);
         if (realCategories) setCategories(realCategories.map(normalizeCategory));
       } catch (err) {
         console.error('Failed to fetch public catalog data', err);
+        setProductsError(true);
       } finally {
         setProductsLoading(false);
       }
     };
 
     void fetchPublicData();
-    void fetchAdminData();
-    window.addEventListener('pb-auth-changed', fetchAdminData);
-    return () => window.removeEventListener('pb-auth-changed', fetchAdminData);
+    const refreshCategoryAccess = async () => {
+      const result = isSuperAdmin() ? await api.getAdminCategories() : await api.getCategories();
+      if (result) setCategories(result.map(normalizeCategory));
+    };
+    window.addEventListener('pb-auth-changed', refreshCategoryAccess);
+    return () => window.removeEventListener('pb-auth-changed', refreshCategoryAccess);
   }, []);
 
   // Debounced local storage sync
@@ -424,7 +442,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => { saveToStorage('playbimboo_reviews', reviews); }, [reviews, saveToStorage]);
   useEffect(() => { saveToStorage('playbimboo_settings', settings); }, [settings, saveToStorage]);
   useEffect(() => {
-    if (isCartHydrated) saveToStorage('playbimboo_cart', cart);
+    if (isCartHydrated && typeof window !== 'undefined') { try { localStorage.setItem('playbimboo_cart', JSON.stringify(cart)); } catch (e) {} }
   }, [cart, isCartHydrated, saveToStorage]);
 
   useEffect(() => {
@@ -440,7 +458,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => window.removeEventListener('storage', syncCartFromAnotherTab);
   }, []);
 
-  useEffect(() => { saveToStorage('playbimboo_wishlist', wishlist); }, [wishlist, saveToStorage]);
+  useEffect(() => { if (typeof window !== 'undefined') { try { localStorage.setItem('playbimboo_wishlist', JSON.stringify(wishlist)); } catch (e) {} } }, [wishlist]);
 
   // Prune wishlist so it only ever reflects REAL, currently-existing products.
   // This clears out any stale/ghost IDs left over from old mock data or
@@ -892,6 +910,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         products: isHydrated ? products : [],
         productsLoading,
+        productsError,
         categories: isHydrated ? categories : INITIAL_CATEGORIES,
         orders: isHydrated ? orders : INITIAL_ORDERS,
         customers: isHydrated ? customers : INITIAL_CUSTOMERS,

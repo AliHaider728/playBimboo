@@ -18,7 +18,6 @@ export const ProductSpotlight: React.FC<{ product: Product }> = ({ product }) =>
   const router = useRouter();
   const [cartActionState, setCartActionState] = useState<'idle' | 'adding' | 'added'>('idle');
   const cartActionLocked = useRef(false);
-  const addTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const isVariable = product.productType === 'variable';
@@ -79,7 +78,6 @@ export const ProductSpotlight: React.FC<{ product: Product }> = ({ product }) =>
   }, [activeVariations, product.attributes]);
 
   useEffect(() => () => {
-    if (addTimerRef.current) clearTimeout(addTimerRef.current);
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
   }, []);
 
@@ -90,8 +88,8 @@ export const ProductSpotlight: React.FC<{ product: Product }> = ({ product }) =>
     }
     if (cartActionLocked.current) return;
     cartActionLocked.current = true;
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     setCartActionState('adding');
-    addTimerRef.current = setTimeout(() => {
       if (selectedVariation) {
         addToCart(product, 1, JSON.stringify(selectedVariation.attributes), selectedVariation.id);
       } else {
@@ -108,11 +106,10 @@ export const ProductSpotlight: React.FC<{ product: Product }> = ({ product }) =>
 
       showToast(`Added ${product.name} to cart.`, 'success');
       setCartActionState('added');
+      cartActionLocked.current = false;
       resetTimerRef.current = setTimeout(() => {
-        cartActionLocked.current = false;
         setCartActionState('idle');
-      }, 900);
-    }, 180);
+      }, 300);
   };
 
   return (

@@ -38,10 +38,9 @@ export const CategoryPageClient: React.FC = () => {
       router.push(pathname + query, { scroll: false });
     }
   };
-  const { products, categories } = useStore();
+  const { products, categories, productsLoading, productsError, refreshProducts } = useStore();
 
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   useScrollLock(mobileFilterOpen);
 
@@ -374,11 +373,16 @@ export const CategoryPageClient: React.FC = () => {
             </div>
 
             {/* Product Grid */}
-            {loading ? (
+            {productsLoading && products.length === 0 ? (
               <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
+              </div>
+            ) : productsError && products.length === 0 ? (
+              <div className="rounded-3xl border border-slate-100 bg-white p-12 text-center">
+                <p className="text-sm text-slate-600">The catalog is temporarily unavailable.</p>
+                <button onClick={() => void refreshProducts()} className="mt-4 rounded-xl bg-rose-500 px-5 py-2 text-sm font-bold text-white">Try again</button>
               </div>
             ) : sortedProducts.length === 0 ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 space-y-4">

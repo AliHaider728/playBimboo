@@ -26,6 +26,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMo
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLocked = React.useRef(false);
   
   const { showToast } = useToast();
   const { login } = useAuth();
@@ -78,15 +79,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMo
       }
     }
     
+    if (submitLocked.current) return;
+    submitLocked.current = true;
     setIsSubmitting(true);
     try {
       if (mode === 'signup') {
-        await api.register(email, password, name);
+        const result = await api.register(email, password, name);
+        if (!result) throw new Error('Could not create your account. Please try again.');
         trackTikTokCompleteRegistration();
         showToast('Account created successfully. Please sign in.', 'success');
         setMode('login');
       } else if (mode === 'forgot-password') {
-        await api.forgotPassword(email);
+        const result = await api.forgotPassword(email);
+        if (!result) throw new Error('Could not request a reset link. Please try again.');
         showToast('If an account exists, a password reset link has been sent.', 'success');
         setMode('login');
       } else {
@@ -101,6 +106,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMo
     } catch (err: any) {
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
+      submitLocked.current = false;
       setIsSubmitting(false);
     }
   };

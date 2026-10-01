@@ -97,6 +97,7 @@ export const CheckoutPageClient: React.FC = () => {
   // Order result state
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const orderRequestLocked = React.useRef(false);
 
   // Product overrides take priority; otherwise the store threshold applies.
   let highestOverrideFee = 0;
@@ -165,7 +166,8 @@ export const CheckoutPageClient: React.FC = () => {
   };
 
   const handlePaymentSubmit = async () => {
-    if (isPlacingOrder) return;
+    if (orderRequestLocked.current) return;
+    orderRequestLocked.current = true;
     setIsPlacingOrder(true);
     
     trackTikTokAddPaymentInfo({
@@ -173,7 +175,9 @@ export const CheckoutPageClient: React.FC = () => {
       value: cartSubtotal,
     });
 
-    const created = await placeOrder({
+    let created: Order | null = null;
+    try {
+      created = await placeOrder({
       customerName: fullName.trim(),
       email: email.trim(),
       phone: phone.trim(),
@@ -237,9 +241,13 @@ export const CheckoutPageClient: React.FC = () => {
       paymentMethod: 'Cash on Delivery (COD)',
       trackingNumber: `PB-${Math.floor(10000000 + Math.random() * 90000000)}`,
       checkoutRequestId
-    });
-
-    setIsPlacingOrder(false);
+      });
+    } catch {
+      // The same retryable error is shown below for failed responses and exceptions.
+    } finally {
+      orderRequestLocked.current = false;
+      setIsPlacingOrder(false);
+    }
     if (!created) {
       showToast('The order could not be placed. Please recheck stock and try again.', 'error');
       return;

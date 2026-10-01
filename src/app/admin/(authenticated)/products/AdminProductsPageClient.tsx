@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Plus, Search, Edit2, Trash2, Eye, EyeOff, UploadCloud, DownloadCloud, GripVertical } from 'lucide-react';
 import { useRouter } from "next/navigation";
 import {
@@ -62,6 +62,8 @@ export const AdminProductsPageClient: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isReordering, setIsReordering] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const importLocked = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -122,7 +124,9 @@ export const AdminProductsPageClient: React.FC = () => {
   };
 
   const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
+    if (!e.target.files?.[0] || importLocked.current) return;
+    importLocked.current = true;
+    setIsImporting(true);
     const file = e.target.files[0];
     const formData = new FormData();
     formData.append('file', file);
@@ -134,8 +138,8 @@ export const AdminProductsPageClient: React.FC = () => {
         body: formData
       });
       if (res.ok) {
-        showToast('Products imported successfully. Refreshing the catalog…', 'success');
-        window.location.reload();
+        const refreshed = await refreshProducts();
+        showToast(refreshed ? 'Products imported successfully.' : 'Products imported, but the catalog could not refresh. Try again.', refreshed ? 'success' : 'warning');
       } else {
         showToast('Failed to import products. Check the CSV and try again.', 'error');
       }
@@ -143,6 +147,8 @@ export const AdminProductsPageClient: React.FC = () => {
       showToast('Could not import products.', 'error');
     }
     e.target.value = '';
+    importLocked.current = false;
+    setIsImporting(false);
   };
 
   const toggleVisibility = async (prod: Product) => {
@@ -179,10 +185,10 @@ export const AdminProductsPageClient: React.FC = () => {
               <DownloadCloud className="w-4 h-4" />
               <span>Export CSV</span>
             </button>
-            <label className="cursor-pointer px-4 py-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-2 shadow-sm transition-all">
+            <label className={`px-4 py-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-2 shadow-sm transition-all ${isImporting ? 'cursor-wait opacity-60' : 'cursor-pointer'}`}>
               <UploadCloud className="w-4 h-4" />
-              <span>Import CSV</span>
-              <input type="file" accept=".csv" className="hidden" onChange={handleImportCSV} />
+              <span>{isImporting ? 'Importing…' : 'Import CSV'}</span>
+              <input type="file" accept=".csv" className="hidden" disabled={isImporting} onChange={handleImportCSV} />
             </label>
             <button
               onClick={() => router.push('/admin/products/new')}

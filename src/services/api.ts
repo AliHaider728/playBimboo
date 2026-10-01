@@ -47,7 +47,9 @@ const safeApiError = (status: number, backendMessage?: string) => {
   return status >= 500 ? 'Temporary service problem. Please try again.' : safeBackend || 'Request failed.';
 };
 
-async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T | null> {
+const pendingGetRequests = new Map<string, Promise<unknown>>();
+
+async function performFetchJson<T>(endpoint: string, options?: RequestInit): Promise<T | null> {
   try {
     lastApiError = '';
     const token = getAuthToken();
@@ -60,7 +62,7 @@ async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T 
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    console.log(`FETCHING FROM: ${API_BASE_URL}${endpoint}`); const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       cache: options?.cache || 'no-store',
       credentials: 'include',
@@ -78,6 +80,19 @@ async function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T 
     console.error(`[Backend API Error] fetchJson failed for ${endpoint}:`, err);
     return null;
   }
+}
+
+function fetchJson<T>(endpoint: string, options?: RequestInit): Promise<T | null> {
+  if (typeof window === 'undefined' || (options?.method && options.method.toUpperCase() !== 'GET')) {
+    return performFetchJson<T>(endpoint, options);
+  }
+  const key = `${getAuthToken() || ''}:${endpoint}`;
+  const existing = pendingGetRequests.get(key);
+  if (existing) return existing as Promise<T | null>;
+  const request = performFetchJson<T>(endpoint, options);
+  pendingGetRequests.set(key, request);
+  void request.finally(() => pendingGetRequests.delete(key));
+  return request;
 }
 
 export const api = {

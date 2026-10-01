@@ -1,10 +1,10 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { SeoHead } from '../../components/common/SeoHead';
 import { useStore } from '../../context/StoreContext';
-import { api } from '../../services/api';
+import { api, getLastApiError } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 
 // TikTok SVG (not in lucide-react)
@@ -57,13 +57,17 @@ export const ContactPageClient: React.FC = () => {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLocked = useRef(false);
   const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitLocked.current) return;
+    submitLocked.current = true;
     setIsSubmitting(true);
     try {
-      await api.submitContact({ name, email, subject, message });
+      const result = await api.submitContact({ name, email, subject, message });
+      if (!result) throw new Error(getLastApiError() || 'Could not send your message. Please try again.');
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
@@ -75,6 +79,7 @@ export const ContactPageClient: React.FC = () => {
     } catch (err: any) {
       showToast(err.message || 'Failed to send message', 'error');
     } finally {
+      submitLocked.current = false;
       setIsSubmitting(false);
     }
   };

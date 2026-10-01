@@ -147,7 +147,6 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
     // Cart CTA button state
     setCartActionState('idle');
     cartActionLocked.current = false;
-    if (addTimerRef.current) { clearTimeout(addTimerRef.current); addTimerRef.current = null; }
     if (resetTimerRef.current) { clearTimeout(resetTimerRef.current); resetTimerRef.current = null; }
     // Gallery zoom & lightbox  
     setIsZooming(false);
@@ -487,6 +486,7 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
     }
     if (cartActionLocked.current) return;
     cartActionLocked.current = true;
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     setCartActionState('adding');
       // Derive effective price based on selected quantity
       let effectivePrice = currentPrice;
@@ -549,10 +549,10 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
       });
       showToast(`Added ${quantity} x ${product.name} to cart.`, 'success');
       setCartActionState('added');
+      cartActionLocked.current = false;
       resetTimerRef.current = setTimeout(() => {
-        cartActionLocked.current = false;
         setCartActionState('idle');
-      }, 900);
+      }, 300);
   };
 
   const handleToggleWishlist = () => {
@@ -630,8 +630,11 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
               aria-label={`Enlarge ${product.name} image`}
             >
               <img
-                src={getSafeImageSrc(activeImageUrl)}
+                src={getSafeImageSrc(activeImageUrl, { width: 1100 })}
                 alt={product.name}
+                width={1100}
+                height={1100}
+                fetchPriority="high"
                 style={{ transformOrigin: zoomOrigin }}
                 className={`h-full w-full object-contain object-center transition-transform duration-200 ease-out motion-reduce:transition-none ${isZooming ? 'scale-[1.75]' : 'scale-100'}`}
               />
@@ -660,7 +663,7 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
                       (!overrideImage && activeImageIndex === idx) ? 'border-rose-500 bg-rose-50 shadow-sm' : 'border-slate-200 bg-white opacity-75 hover:opacity-100'
                     }`}
                   >
-                    <img src={getSafeImageSrc(img)} alt={`${product.name} thumbnail ${idx + 1}`} className="h-full w-full object-contain" />
+                    <img src={getSafeImageSrc(img, { width: 160 })} alt={`${product.name} thumbnail ${idx + 1}`} width={160} height={160} loading="lazy" className="h-full w-full object-contain" />
                   </button>
                 ))}
               </div>

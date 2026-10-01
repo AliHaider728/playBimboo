@@ -28,6 +28,8 @@ export const CartDrawer: React.FC = () => {
 
   const [couponCodeInput, setCouponCodeInput] = useState('');
   const [couponMsg, setCouponMsg] = useState<{ success: boolean; message: string } | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const couponRequestLocked = React.useRef(false);
 
   useScrollLock(isCartOpen);
 
@@ -37,11 +39,19 @@ export const CartDrawer: React.FC = () => {
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!couponCodeInput) return;
-    const res = await applyCoupon(couponCodeInput);
-    setCouponMsg(res);
-    if (res.success) {
-      setCouponCodeInput('');
+    if (!couponCodeInput.trim() || couponRequestLocked.current) return;
+    couponRequestLocked.current = true;
+    setIsApplyingCoupon(true);
+    setCouponMsg(null);
+    try {
+      const res = await applyCoupon(couponCodeInput);
+      setCouponMsg(res);
+      if (res.success) setCouponCodeInput('');
+    } catch {
+      setCouponMsg({ success: false, message: 'Could not apply the promo code. Please try again.' });
+    } finally {
+      couponRequestLocked.current = false;
+      setIsApplyingCoupon(false);
     }
   };
 
@@ -253,9 +263,10 @@ export const CartDrawer: React.FC = () => {
                   </div>
                   <button
                     type="submit"
-                    className="px-3.5 py-2 rounded-xl bg-slate-800 text-white font-heading font-bold text-xs hover:bg-slate-900 transition-colors"
+                    disabled={isApplyingCoupon}
+                    className="px-3.5 py-2 rounded-xl bg-slate-800 text-white font-heading font-bold text-xs hover:bg-slate-900 transition-colors disabled:opacity-60 disabled:cursor-wait"
                   >
-                    Apply
+                    {isApplyingCoupon ? 'Applying…' : 'Apply'}
                   </button>
                 </form>
               )}

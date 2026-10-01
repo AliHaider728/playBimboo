@@ -99,6 +99,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
 
   const performAddToCart = (variationToUse: any) => {
     cartActionLocked.current = true;
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     setCartActionState('adding');
       if (variationToUse) {
         addToCart(product, 1, JSON.stringify(variationToUse.attributes), variationToUse.id);
@@ -128,10 +129,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
 
       showToast(`Added ${product.name} to cart.`, 'success');
       setCartActionState('added');
+      cartActionLocked.current = false;
       resetTimerRef.current = setTimeout(() => {
-        cartActionLocked.current = false;
         setCartActionState('idle');
-      }, 900);
+      }, 300);
   };
 
 
