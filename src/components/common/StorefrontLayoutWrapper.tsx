@@ -3,6 +3,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Header } from './Header';
+import ScrollToTop from './ScrollToTop';
 import { Footer } from './Footer';
 import { MobileBottomNav } from './MobileBottomNav';
 
@@ -19,6 +20,7 @@ export const StorefrontLayoutWrapper: React.FC<{ children: React.ReactNode }> = 
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800 pb-20 xl:pb-0">
+      <ScrollToTop />
       <Header />
       <CartDrawer />
       <main className="flex-1">

@@ -321,12 +321,12 @@ export const CheckoutPageClient: React.FC = () => {
     const confirmationEmailSent = Boolean(created.confirmationEmailSentAt && created.confirmationEmailAccepted !== false);
     showToast(!email.trim()
       ? 'Order confirmed successfully.'
-      : created.confirmationEmailAccepted === false
+      : (created.confirmationEmailAccepted === false && created.confirmationEmailSentAt)
         ? 'Order confirmed. We could not send the email, but your order was placed successfully.'
         : confirmationEmailSent 
           ? 'Order confirmed. A confirmation email has been sent.'
           : 'Order confirmed. You will receive an email shortly.',
-      !email.trim() || created.confirmationEmailAccepted !== false ? 'success' : 'warning');
+      !email.trim() || !(created.confirmationEmailAccepted === false && created.confirmationEmailSentAt) ? 'success' : 'warning');
   };
 
   if (cart.length === 0 && currentStep !== 2) {
@@ -405,7 +405,7 @@ export const CheckoutPageClient: React.FC = () => {
                   ? <>Your order is safely recorded. Our team will contact you before dispatch.</>
                   : completedOrder.confirmationEmailAccepted !== false && completedOrder.confirmationEmailSentAt
                   ? <>We've received your order and sent a confirmation receipt to <strong>{completedOrder.email}</strong>.</>
-                  : <>We've received your order successfully. The email could not be sent, but your order is safely recorded.</>}
+                  : <>We've received your order successfully. A confirmation email will be sent to <strong>{completedOrder.email}</strong> shortly.</>}
               </p>
             </div>
 
