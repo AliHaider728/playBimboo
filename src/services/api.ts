@@ -77,7 +77,7 @@ async function performFetchJson<T>(endpoint: string, options?: RequestInit): Pro
     return await res.json();
   } catch (err: any) {
     lastApiError = err.message || 'Request failed';
-    console.error(`[Backend API Error] fetchJson failed for ${endpoint}:`, err);
+    if (!err.message || (!err.message.includes("token") && !err.message.includes("Authentication"))) { console.warn(`[Backend API] fetchJson failed for ${endpoint}:`, err.message); }
     return null;
   }
 }
