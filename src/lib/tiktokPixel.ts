@@ -145,9 +145,13 @@ export const trackTikTokViewContent = ({
   currency?: string;
 }) => {
   trackTikTokEvent("ViewContent", {
-    content_id: id,
-    content_name: name,
-    content_type: "product",
+    contents: [
+      {
+        content_id: id,
+        content_type: "product",
+        content_name: name,
+      },
+    ],
     value: price,
     currency,
   });
@@ -155,7 +159,14 @@ export const trackTikTokViewContent = ({
 
 export const trackTikTokSearch = ({ query }: { query: string }) => {
   trackTikTokEvent("Search", {
-    query,
+    contents: [
+      {
+        content_id: query,
+        content_type: "product",
+        content_name: query,
+      },
+    ],
+    search_string: query,
   });
 };
 
@@ -171,9 +182,13 @@ export const trackTikTokAddToWishlist = ({
   currency?: string;
 }) => {
   trackTikTokEvent("AddToWishlist", {
-    content_id: id,
-    content_name: name,
-    content_type: "product",
+    contents: [
+      {
+        content_id: id,
+        content_type: "product",
+        content_name: name,
+      },
+    ],
     value: price,
     currency,
   });
@@ -193,11 +208,14 @@ export const trackTikTokAddToCart = ({
   currency?: string;
 }) => {
   trackTikTokEvent("AddToCart", {
-    content_id: id,
-    content_name: name,
-    content_type: "product",
+    contents: [
+      {
+        content_id: id,
+        content_type: "product",
+        content_name: name,
+      },
+    ],
     value: price * quantity,
-    quantity,
     currency,
   });
 };
@@ -233,9 +251,11 @@ export const trackTikTokInitiateCheckout = ({
   }
 
   const tracked = trackTikTokEvent("InitiateCheckout", {
-    content_id: items.map((item) => item.id).join(","), // TikTok sometimes expects a single string or array, passing comma-separated is safe
-    content_type: "product",
-    quantity: items.reduce((total, item) => total + item.quantity, 0),
+    contents: items.map((item) => ({
+      content_id: item.id,
+      content_type: "product",
+      content_name: item.id,
+    })),
     value,
     currency,
   });
@@ -255,8 +275,24 @@ export const trackTikTokInitiateCheckout = ({
   }
 };
 
-export const trackTikTokAddPaymentInfo = () => {
-  trackTikTokEvent("AddPaymentInfo", {});
+export const trackTikTokAddPaymentInfo = ({
+  items,
+  value,
+  currency = "PKR",
+}: {
+  items: Array<{ id: string; name: string }>;
+  value: number;
+  currency?: string;
+}) => {
+  trackTikTokEvent("AddPaymentInfo", {
+    contents: items.map((item) => ({
+      content_id: item.id,
+      content_type: "product",
+      content_name: item.name,
+    })),
+    value,
+    currency,
+  });
 };
 
 export const trackTikTokPlaceAnOrder = ({
@@ -267,7 +303,7 @@ export const trackTikTokPlaceAnOrder = ({
   email,
   phone,
 }: {
-  items: Array<{ id: string; quantity: number }>;
+  items: Array<{ id: string; name: string; quantity: number }>;
   value: number;
   currency?: string;
   eventId: string;
@@ -275,12 +311,13 @@ export const trackTikTokPlaceAnOrder = ({
   phone?: string | null;
 }) => {
   trackTikTokEvent("PlaceAnOrder", {
-    content_id: items.map((item) => item.id).join(","),
-    content_type: "product",
-    quantity: items.reduce((total, item) => total + item.quantity, 0),
+    contents: items.map((item) => ({
+      content_id: item.id,
+      content_type: "product",
+      content_name: item.name,
+    })),
     value,
     currency,
-    // Pass raw values — the Next.js CAPI layer will normalize + hash them
     ...(email && email.trim() ? { email: email.trim() } : {}),
     ...(phone && phone.trim() ? { phone: phone.trim() } : {}),
   }, eventId);
@@ -294,7 +331,7 @@ export const trackTikTokPurchase = ({
   email,
   phone,
 }: {
-  items: Array<{ id: string; quantity: number }>;
+  items: Array<{ id: string; name: string; quantity: number }>;
   value: number;
   currency?: string;
   eventId: string;
@@ -302,12 +339,13 @@ export const trackTikTokPurchase = ({
   phone?: string | null;
 }) => {
   trackTikTokEvent("Purchase", {
-    content_id: items.map((item) => item.id).join(","),
-    content_type: "product",
-    quantity: items.reduce((total, item) => total + item.quantity, 0),
+    contents: items.map((item) => ({
+      content_id: item.id,
+      content_type: "product",
+      content_name: item.name,
+    })),
     value,
     currency,
-    // Pass raw values — the Next.js CAPI layer will normalize + hash them
     ...(email && email.trim() ? { email: email.trim() } : {}),
     ...(phone && phone.trim() ? { phone: phone.trim() } : {}),
   }, eventId);

@@ -168,7 +168,10 @@ export const CheckoutPageClient: React.FC = () => {
     if (isPlacingOrder) return;
     setIsPlacingOrder(true);
     
-    trackTikTokAddPaymentInfo();
+    trackTikTokAddPaymentInfo({
+      items: cart.map(item => ({ id: item.product.id, name: item.product.name })),
+      value: cartSubtotal,
+    });
 
     const created = await placeOrder({
       customerName: fullName.trim(),
@@ -278,6 +281,7 @@ export const CheckoutPageClient: React.FC = () => {
       trackTikTokPlaceAnOrder({
         items: created.items.map((item) => ({
           id: item.productId,
+          name: item.name,
           quantity: item.quantity,
         })),
         value: created.total,
@@ -290,6 +294,7 @@ export const CheckoutPageClient: React.FC = () => {
       trackTikTokPurchase({
         items: created.items.map((item) => ({
           id: item.productId,
+          name: item.name,
           quantity: item.quantity,
         })),
         value: created.total,
