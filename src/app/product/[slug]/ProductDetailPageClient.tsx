@@ -623,7 +623,7 @@ export const ProductDetailPageClient: React.FC<{ initialProduct?: any }> = ({ in
             <button
               ref={lightboxTriggerRef}
               type="button"
-              onClick={openLightbox}
+              
               onPointerMove={handleZoomPointerMove}
               onPointerLeave={() => { setIsZooming(false); setZoomOrigin('50% 50%'); }}
               className="group/gallery relative flex aspect-square w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2"

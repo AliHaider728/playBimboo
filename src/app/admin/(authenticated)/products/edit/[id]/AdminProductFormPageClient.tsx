@@ -365,7 +365,7 @@ export const AdminProductFormPageClient: React.FC = () => {
     setName(editingProduct.name);
     setShortDescription(editingProduct.shortDescription || '');
     setDescription(editingProduct.description || '');
-    setCategory(editingProduct.category || '');
+    setCategory(editingProduct.categoryNames && editingProduct.categoryNames.length > 0 ? editingProduct.categoryNames[0] : (editingProduct.category || ''));
     setCategoryId(editingProduct.categoryId || categories.find(item => item.slug === editingProduct.categorySlug || item.name === editingProduct.category)?.id || '');
     setCategorySlug(editingProduct.categorySlug || '');
     setCategoryIds(editingProduct.categoryIds?.length
@@ -496,7 +496,7 @@ export const AdminProductFormPageClient: React.FC = () => {
             if (data.slugManuallyEdited !== undefined) setSlugManuallyEdited(data.slugManuallyEdited);
             setShortDescription(data.shortDescription || '');
             setDescription(data.description || '');
-            setCategory(data.category || '');
+            setCategory(data.categoryNames && data.categoryNames.length > 0 ? data.categoryNames[0] : (data.category || ''));
             setCategoryId(data.categoryId || '');
             setCategorySlug(data.categorySlug || '');
             setCategoryIds(data.categoryIds || (data.categoryId ? [data.categoryId] : []));

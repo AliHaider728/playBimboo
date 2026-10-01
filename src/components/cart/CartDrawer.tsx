@@ -167,7 +167,7 @@ export const CartDrawer: React.FC = () => {
                       </div>
 
                       <span className="text-[10px] text-sky-600 font-semibold uppercase block">
-                        {item.product.category || 'Uncategorized'}
+                        {item.product.categoryNames && item.product.categoryNames.length > 0 ? item.product.categoryNames[0] : (item.product.category || 'Uncategorized')}
                       </span>
                       
                       {variation && (

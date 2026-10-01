@@ -243,7 +243,7 @@ export const Header: React.FC = () => {
                           <h4 className="text-xs md:text-sm font-heading font-bold text-slate-800 truncate">
                             {prod.name}
                           </h4>
-                          <span className="text-[9px] md:text-xs text-sky-600 font-semibold truncate block">{prod.category || 'Uncategorized'}</span>
+                          <span className="text-[9px] md:text-xs text-sky-600 font-semibold truncate block">{prod.categoryNames && prod.categoryNames.length > 0 ? prod.categoryNames[0] : (prod.category || 'Uncategorized')}</span>
                         </div>
                         <span className="text-[10px] md:text-sm font-bold text-slate-900 ml-1">{formatPrice(prod.price, settings.currency)}</span>
                       </Link>

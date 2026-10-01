@@ -35,7 +35,7 @@ export const QuickViewModal: React.FC<Props> = ({ product, onClose, onAddToCart 
           </div>
           <div className="space-y-3">
             <span className="text-xs font-bold text-sky-600 uppercase">
-              {product.category || 'Uncategorized'}
+              {product.categoryNames && product.categoryNames.length > 0 ? product.categoryNames[0] : (product.category || 'Uncategorized')}
             </span>
             <h3 className="font-heading font-bold text-lg text-slate-900">
               {product.name}

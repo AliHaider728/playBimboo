@@ -102,7 +102,7 @@ const normalizeProduct = (product: Partial<Product> & MongoRecord): Product => {
   shortDescription: product.shortDescription || '',
   status: product.status || 'published',
   ...inventory,
-  category: product.category || '',
+  category: (product.categoryNames && product.categoryNames.length > 0 ? product.categoryNames[0] : (product.category || '')),
   categorySlug: product.categorySlug || '',
   categoryIds: Array.isArray(product.categoryIds) && product.categoryIds.length > 0
     ? product.categoryIds.filter((value): value is string => typeof value === 'string' && Boolean(value))
