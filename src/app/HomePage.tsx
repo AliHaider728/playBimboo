@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { SeoHead } from '../components/common/SeoHead';
 import { ProductSpotlight } from '../components/home/ProductSpotlight';
 import { Product, Category, StoreSettings } from '../types';
@@ -32,7 +32,7 @@ export const HomePage: React.FC<Props> = ({ products, categories, settings }) =>
     return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
   });
   const newArrivals = markedNewArrivals.length > 0 ? markedNewArrivals : recentProducts;
-  const spotlightProduct = visibleProducts.find(p => p.category === 'educational-stem') || visibleProducts[0];
+  const spotlightProduct = visibleProducts.find(p => p.isSpotlight) || visibleProducts[0];
 
   const sectionByKey = Object.fromEntries((settings?.homepageSections || []).map(section => [section.key, section]));
 
