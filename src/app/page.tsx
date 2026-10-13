@@ -12,7 +12,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://admin.playbimboo.com
 async function fetchData() {
   // Using next: { revalidate: 60 } to cache the homepage for 60 seconds.
   // This ensures fast loads for users while keeping products fresh shortly after admin updates.
-  const fetchOpts = { next: { revalidate: 60 } };
+  const fetchOpts: RequestInit & { next?: { revalidate: number } } = {
+    next: { revalidate: 60 },
+    signal: AbortSignal.timeout(4000)
+  };
   
   try {
     const [productsRes, categoriesRes, settingsRes] = await Promise.all([
