@@ -4,7 +4,6 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
 !.env.example
 
 .next/
@@ -19,3 +18,4 @@ cpanel-build/
 *_opt*.png
 check_*.js
 temp.html
+config.bat
