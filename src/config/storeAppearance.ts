@@ -18,7 +18,7 @@ const systemItem = (key: string, label: string, path: string, displayOrder: numb
 export const DEFAULT_STOREFRONT_NAVIGATION: StorefrontNavigationItem[] = [
   systemItem('home', 'Home', '/', 0),
   systemItem('shop', 'Shop', '/category/all', 1, { showOnMobile: false }),
-  systemItem('categories', 'Shop Categories', '/category/all', 2, { menuType: 'dropdown', path: undefined }),
+  systemItem('categories', 'Shop Categories', '/category/all', 2, { menuType: 'dropdown', path: undefined, enabled: false, visible: false }),
   systemItem('about', 'About', '/about', 3, { showOnMobile: false }),
   systemItem('contact', 'Contact', '/contact', 4, { showOnMobile: false }),
   systemItem('wishlist', 'Wishlist', '/wishlist', 5, { showOnDesktop: false }),

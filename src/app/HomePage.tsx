@@ -3,8 +3,6 @@ import { SeoHead } from '../components/common/SeoHead';
 import { ProductSpotlight } from '../components/home/ProductSpotlight';
 import { Product, Category, StoreSettings } from '../types';
 import { Hero } from '../components/home/Hero';
-import { Categories } from '../components/home/Categories';
-import { AgeGroups } from '../components/home/AgeGroups';
 import { BrandCampaign } from '../components/home/BrandCampaign';
 import { FeaturedProductsClient } from '../components/home/FeaturedProductsClient';
 import { NewArrivalsClient } from '../components/home/NewArrivalsClient';
@@ -53,22 +51,6 @@ export const HomePage: React.FC<Props> = ({ products, categories, settings }) =>
         <div style={{ order: (sectionByKey.hero?.order ?? 0) + 0.5 }}>
           <div id="spotlight" className="mt-10 sm:mt-16 lg:mt-20">
             <ProductSpotlight product={spotlightProduct} />
-          </div>
-        </div>
-      )}
-
-      {sectionByKey.categories?.enabled && (
-        <div style={{ order: sectionByKey.categories.order }}>
-          <div className="mt-16 sm:mt-24 lg:mt-32">
-            <Categories categories={categories} sectionSettings={sectionByKey.categories} />
-          </div>
-        </div>
-      )}
-      
-      {sectionByKey.ageGroups?.enabled && (
-        <div style={{ order: sectionByKey.ageGroups.order }}>
-          <div className="mt-16 sm:mt-24 lg:mt-32">
-            <AgeGroups sectionSettings={sectionByKey.ageGroups} />
           </div>
         </div>
       )}
