@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
+import { getTikTokContext } from '../../lib/tiktokPixel';
 
 export function DelayedScripts() {
   const [load, setLoad] = useState(false);
@@ -12,6 +13,7 @@ export function DelayedScripts() {
   const TIKTOK_PIXEL_ID = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID;
 
   useEffect(() => {
+    getTikTokContext(); // Persist ttclid on landing before navigating to checkout.
     let timeoutId: NodeJS.Timeout;
     const init = () => {
       if (!load) {
@@ -41,7 +43,7 @@ export function DelayedScripts() {
       if (typeof window !== 'undefined' && window.fbq) {
         window.fbq('track', 'PageView');
       }
-      if (typeof window !== 'undefined' && window.ttq) {
+      if (typeof window !== 'undefined' && typeof window.ttq?.page === 'function') {
         window.ttq.page();
       }
     }

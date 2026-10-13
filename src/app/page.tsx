@@ -1,12 +1,13 @@
 import React from 'react';
 import { HomePage } from './HomePage';
+import { INITIAL_SETTINGS, INITIAL_CATEGORIES } from '../data/mockData';
 
 export const metadata = {
   title: 'Play Bimboo - Magical Toys, Games & Playland',
   description: 'Discover endless play with Play Bimboo! Shop action figures, educational toys, board games, plush soft toys, and outdoor play.',
 };
 
-const API_URL = 'https://admin.playbimboo.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://admin.playbimboo.com/api';
 
 async function fetchData() {
   // Using next: { revalidate: 60 } to cache the homepage for 60 seconds.
@@ -15,12 +16,12 @@ async function fetchData() {
   
   try {
     const [productsRes, categoriesRes, settingsRes] = await Promise.all([
-      fetch(`${API_URL}/products?isVisible=true`, fetchOpts),
-      fetch(`${API_URL}/categories`, fetchOpts),
-      fetch(`${API_URL}/settings`, fetchOpts)
+      fetch(`${API_URL}/products?isVisible=true`, fetchOpts).catch(() => null),
+      fetch(`${API_URL}/categories`, fetchOpts).catch(() => null),
+      fetch(`${API_URL}/settings`, fetchOpts).catch(() => null)
     ]);
     
-    const rawProducts = productsRes.ok ? await productsRes.json() : [];
+    const rawProducts = (productsRes && productsRes.ok) ? await productsRes.json().catch(() => []) : [];
     const products = Array.isArray(rawProducts) ? rawProducts.map((p: any) => {
       const id = p.id || p._id || p.slug;
       if (!id || String(id).trim() === '' || String(id) === 'undefined') {
@@ -28,22 +29,22 @@ async function fetchData() {
       }
       return { ...p, id: String(id || '') };
     }).filter((p: any) => p.id && p.id.trim() !== '' && p.id !== 'undefined') : [];
-    const categories = categoriesRes.ok ? await categoriesRes.json() : [];
-    const settings = settingsRes.ok ? await settingsRes.json() : null;
+    
+    const categories = (categoriesRes && categoriesRes.ok) ? await categoriesRes.json().catch(() => INITIAL_CATEGORIES) : INITIAL_CATEGORIES;
+    const settings = (settingsRes && settingsRes.ok) ? await settingsRes.json().catch(() => INITIAL_SETTINGS) : INITIAL_SETTINGS;
     
     return { products, categories, settings };
   } catch (error) {
     console.error('Error fetching homepage data:', error);
-    return { products: [], categories: [], settings: null };
+    return { products: [], categories: INITIAL_CATEGORIES, settings: INITIAL_SETTINGS };
   }
 }
 
 export default async function Page() {
   const { products, categories, settings } = await fetchData();
   
-  if (!settings) {
-    return <div className="p-8 text-center">Unable to load store settings.</div>;
-  }
+  const effectiveSettings = settings || INITIAL_SETTINGS;
+  const effectiveCategories = (categories && categories.length > 0) ? categories : INITIAL_CATEGORIES;
 
-  return <HomePage products={products} categories={categories} settings={settings} />;
+  return <HomePage products={products} categories={effectiveCategories} settings={effectiveSettings} />;
 }

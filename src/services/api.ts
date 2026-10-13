@@ -1,5 +1,5 @@
 // PlayBimboo Unified Backend API Client
-export const API_BASE_URL = 'https://admin.playbimboo.com/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://admin.playbimboo.com/api';
 
 // Helper for Token Management
 export const getAuthToken = (): string | null => {

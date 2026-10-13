@@ -118,6 +118,8 @@ cpSync(join(rootDir, 'public'), join(deployDir, 'public'), { recursive: true });
 
 if (existsSync(join(rootDir, '.env.production'))) {
   cpSync(join(rootDir, '.env.production'), join(deployDir, '.env'));
+} else if (existsSync(join(rootDir, '.env'))) {
+  cpSync(join(rootDir, '.env'), join(deployDir, '.env'));
 }
 
 console.log('Copying full runtime packages...');

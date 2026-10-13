@@ -337,6 +337,7 @@ export interface Order {
   paymentMethod: 'Cash on Delivery (COD)';
   trackingNumber?: string;
   checkoutRequestId?: string;
+  tiktokContext?: { ttclid?: string; ttp?: string; page_url?: string; page_referrer?: string };
   confirmationEmailSentAt?: string;
   confirmationEmailAccepted?: boolean;
   confirmationEmailFailedAt?: string;

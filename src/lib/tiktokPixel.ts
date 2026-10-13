@@ -64,7 +64,8 @@ export const identifyTikTokUser = async ({
   email?: string | null;
   phone?: string | null;
 }) => {
-  if (typeof window === 'undefined' || !window.ttq) return;
+  if (typeof window === 'undefined') return;
+  ensureTikTokQueue();
 
   const hasEmail = email && email.trim().length > 0;
   const hasPhone = phone && phone.trim().length > 0;
@@ -95,41 +96,46 @@ export const identifyTikTokUser = async ({
   }
 };
 
+export const getTikTokContext = () => {
+  if (typeof window === 'undefined') return {};
+  const cookies: Record<string, string> = {};
+  for (const part of document.cookie.split(';')) {
+    const index = part.indexOf('=');
+    if (index < 0) continue;
+    try { cookies[part.slice(0,index).trim()] = decodeURIComponent(part.slice(index+1)); } catch { /* malformed cookie */ }
+  }
+  const clickId = new URL(window.location.href).searchParams.get('ttclid');
+  if (clickId) {
+    document.cookie = 'ttclid=' + encodeURIComponent(clickId) + '; Path=/; Max-Age=7776000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+  }
+  return { ttclid: clickId || cookies.ttclid, ttp: cookies._ttp,
+    page_url: window.location.href, page_referrer: document.referrer || undefined };
+};
+
+const ensureTikTokQueue = () => {
+  if (window.ttq) return;
+  const queue: any = [];
+  // The delayed base loader reuses this array and drains these calls.
+  for (const method of ['track', 'identify']) queue[method] = (...args: any[]) => queue.push([method, ...args]);
+  window.ttq = queue;
+};
+
 export const trackTikTokEvent = (eventName: string, data?: Record<string, unknown>, providedEventId?: string) => {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  
+  if (typeof window === 'undefined') return false;
   const eventId = providedEventId || generateEventId();
-
-  const payload = {
-    ...data,
-    event_id: eventId
-  };
-
-  if (window.ttq) {
-    try {
-      window.ttq.track(eventName, payload);
-    } catch (e) {
-      console.error("[TikTokPixel] Error calling ttq.track:", e);
-    }
-  } else {
-    console.warn("[TikTokPixel] window.ttq is not defined, skipping client tracking for", eventName);
-  }
-
-  // Forward to internal API for server-side TikTok Events API
+  const { email, phone, ...properties } = data || {};
+  ensureTikTokQueue();
+  try { window.ttq.track(eventName, properties, { event_id: eventId }); }
+  catch (error) { console.error('[TikTokPixel] Browser tracking failed', error); }
+  // Purchase is delivered only by Express, after MySQL commit.
+  if (eventName === 'Purchase') return true;
   fetch('/api/tiktok-events', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      event_name: eventName,
-      event_id: eventId,
-      event_data: payload
-    })
-  }).catch(() => {
-    // silently fail tracking errors
-  });
-
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+    body: JSON.stringify({ event_name: eventName, event_id: eventId,
+      event_time: Math.floor(Date.now()/1000), event_data: { ...properties, email, phone }, context: getTikTokContext() })
+  }).then(async response => {
+    if (!response.ok) console.error('[TikTokPixel] Server forwarding failed', response.status, await response.text());
+  }).catch(error => console.error('[TikTokPixel] Server forwarding network failure', error));
   return true;
 };
 
@@ -213,6 +219,8 @@ export const trackTikTokAddToCart = ({
         content_id: id,
         content_type: "product",
         content_name: name,
+        quantity,
+        price,
       },
     ],
     value: price * quantity,
@@ -255,6 +263,7 @@ export const trackTikTokInitiateCheckout = ({
       content_id: item.id,
       content_type: "product",
       content_name: item.id,
+      quantity: item.quantity,
     })),
     value,
     currency,
@@ -280,7 +289,7 @@ export const trackTikTokAddPaymentInfo = ({
   value,
   currency = "PKR",
 }: {
-  items: Array<{ id: string; name: string }>;
+  items: Array<{ id: string; name: string; quantity?: number }>;
   value: number;
   currency?: string;
 }) => {
@@ -289,6 +298,7 @@ export const trackTikTokAddPaymentInfo = ({
       content_id: item.id,
       content_type: "product",
       content_name: item.name,
+      quantity: item.quantity,
     })),
     value,
     currency,
@@ -315,6 +325,7 @@ export const trackTikTokPlaceAnOrder = ({
       content_id: item.id,
       content_type: "product",
       content_name: item.name,
+      quantity: item.quantity,
     })),
     value,
     currency,
@@ -343,6 +354,7 @@ export const trackTikTokPurchase = ({
       content_id: item.id,
       content_type: "product",
       content_name: item.name,
+      quantity: item.quantity,
     })),
     value,
     currency,

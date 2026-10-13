@@ -28,7 +28,7 @@ import { formatPrice } from '../../utils/formatters';
 import { getProductDeliveryType } from '../../utils/products';
 import { getSafeImageSrc } from '../../utils/images';
 import { trackInitiateCheckout } from "../../lib/metaPixel";
-import { identifyTikTokUser, trackTikTokInitiateCheckout, trackTikTokAddPaymentInfo, trackTikTokPurchase, trackTikTokPlaceAnOrder } from "../../lib/tiktokPixel";
+import { identifyTikTokUser, trackTikTokInitiateCheckout, trackTikTokAddPaymentInfo, trackTikTokPurchase, getTikTokContext } from "../../lib/tiktokPixel";
 
 export const CheckoutPageClient: React.FC = () => {
   const [checkoutRequestId] = useState(() => {
@@ -240,7 +240,8 @@ export const CheckoutPageClient: React.FC = () => {
       },
       paymentMethod: 'Cash on Delivery (COD)',
       trackingNumber: `PB-${Math.floor(10000000 + Math.random() * 90000000)}`,
-      checkoutRequestId
+      checkoutRequestId,
+      tiktokContext: getTikTokContext()
       });
     } catch {
       // The same retryable error is shown below for failed responses and exceptions.
@@ -255,7 +256,7 @@ export const CheckoutPageClient: React.FC = () => {
 
 
     // Meta Pixel - Purchase
-    const metaEventId = `purchase_${created.orderId || created.id}`;
+    const metaEventId = `purchase_${(created as Order & { orderId?: string }).orderId || created.id}`;
 
     if (typeof window !== "undefined" && window.fbq) {
       try {
@@ -286,19 +287,6 @@ export const CheckoutPageClient: React.FC = () => {
       }
     }
     try {
-      trackTikTokPlaceAnOrder({
-        items: created.items.map((item) => ({
-          id: item.productId,
-          name: item.name,
-          quantity: item.quantity,
-        })),
-        value: created.total,
-        currency: "PKR",
-        eventId: metaEventId,
-        email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
-      });
-
       trackTikTokPurchase({
         items: created.items.map((item) => ({
           id: item.productId,
